@@ -49,7 +49,7 @@ const Register=()=>{
         }
     }
 
-    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#282C35'}}>{err.message}</p>))
+    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#ff0033'}}>{err.message}</p>))
 
 
     const handleChange=(e)=>{

@@ -14,17 +14,11 @@ const Login=()=>{
     const {username,email,password,passwordConfirmation,errorsState,loading,success}=state;
 
     
-    const isPasswordValid=({password,passwordConfirmation})=>{
-        if(password.length<6 || passwordConfirmation<6){
-            return false;
-        }else if(password!==passwordConfirmation){
-            return false;
-        }else{
-            return true;
-        }
+    const isFormValid=()=>{
+        return email && password;
     }
 
-    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#282C35'}}>{err.message}</p>))
+    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#ff0033'}}>{err.message}</p>))
 
 
     const handleChange=(e)=>{
@@ -34,7 +28,15 @@ const Login=()=>{
         e.preventDefault();
         console.log(state.email,state.password);
         if(isFormValid()){
-       
+            setstate({...state,errorsState:[],loading:true});
+            firebase.auth().signInWithEmailAndPassword(email,password)
+            .then(user=>{
+                console.log(user);
+            })
+            .catch(err=>{
+                console.error(err.message);
+                setstate({...state,errorsState:[...errorsState,err],loading:false});
+            });
         }
     }
 
