@@ -18,24 +18,24 @@ const Register=()=>{
                 <Form size='large' style={{background:'#E15597'}}>
                 <Segment stacked style={{background:'#E15597'}}>
                     <Form.Input fluid name='username' icon='user' iconPosition='left'
-                    placeholder='Username'  type='text' />
+                    placeholder='Username' onChange={handleChange}  type='text' />
 
                     <Form.Input fluid name='email' icon='mail' iconPosition='left'
-                    placeholder='Email Address' type='email' />
+                    placeholder='Email Address'  onChange={handleChange}  type='email' />
 
                     <Form.Input fluid name='password' icon='lock' iconPosition='left'
-                    placeholder='Password' type='password' />
+                    placeholder='Password'  onChange={handleChange}  type='password' />
 
 
                     <Form.Input fluid name='passwordConfirmation' icon='repeat' iconPosition='left'
-                    placeholder='Password Confirmation'  type='password' />
+                    placeholder='Password Confirmation'  onChange={handleChange}  type='password' />
 
                     <Button style={{background:'#282C35'}} fluid size='large'>
                         <p style={{color:'#E15597'}}>Submit</p>
                     </Button>
                 </Segment>
                 </Form>
-                <Message>Already a user? <Link to='/login'>Login</Link></Message>
+                <Message  style={{background:'#E15597'}}><p style={{fontWeight:'bold'}}>Already a user? <Link to='/login'>Login</Link></p></Message>
             </GridColumn>
         </Grid>
     )
