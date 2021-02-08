@@ -1,6 +1,7 @@
 import React,{useState} from 'react';
 import {Grid,Form,Segment,Button,Header,Message,Icon, GridColumn, FormInput} from 'semantic-ui-react';
 import {Link} from 'react-router-dom';
+import md5 from 'md5';
 
 import firebase from '../../firebase';
 const Register=()=>{
@@ -12,7 +13,8 @@ const Register=()=>{
         passwordConfirmation:'',
         errorsState:[],
         loading:false,
-        success:false
+        success:false,
+        userRef:firebase.database().ref('users')
     });
     const {username,email,password,passwordConfirmation,errorsState,loading,success}=state;
 
@@ -21,7 +23,7 @@ const Register=()=>{
         let errors=[];
         let error;
         if(isFormEmpty(state)){
-            error={message:"Fill in all fields"};
+            error={message:"Fill all details"};
             errors=[...errors,error];
             setstate({...state,errorsState:errors});
             return false;
@@ -62,21 +64,41 @@ const Register=()=>{
             .createUserWithEmailAndPassword(email,password)
             .then(createdUser=>{
                 console.log(createdUser);
-                setstate({
-                    username:'',
-                    email:'',
-                    password:'',
-                    passwordConfirmation:'',
-                    errorsState:[],
-                    loading:false,
-                    success:true
-                });
+                createdUser.user.updateProfile({
+                    displayName:username,
+                    photoURL:`http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=identicon`
+                })
+                .then(()=>{
+                    saveUser(createdUser).then(()=>{
+                        console.log("user Saved");
+                        setstate({
+                        username:'',
+                        email:'',
+                        password:'',
+                        passwordConfirmation:'',
+                        errorsState:[],
+                        loading:false,
+                        success:true
+                        });
+                    })
+                }).catch(err=>{
+                    console.error(err);
+                    setstate({...state,errorsState:[...errorsState,err], loading:false});
+                })
+                
             })
             .catch(err=>{
                 console.error(err);
                 setstate({...state,errorsState:[...errorsState,err], loading:false});
             })
         }
+    }
+
+    const saveUser=(createdUser)=>{
+        return state.userRef.child(createdUser.user.uid).set({
+            name:createdUser.user.displayName,
+            avatar:createdUser.user.photoURL
+        });
     }
 
     const handleInputError=(inputName)=>{
