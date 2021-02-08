@@ -109,7 +109,7 @@ const Register=()=>{
 
         <Grid textAlign='center' verticalAlign='middle' className='app'>
             <GridColumn style={{maxWidth:450}}>
-                <Header as='h2' icon color='pink' textAlign='center'>
+                <Header as='h1' icon color='pink' textAlign='center'>
                     <Icon name='code' color='pink'/>
                     Register for DevChat
                 </Header>
@@ -128,7 +128,7 @@ const Register=()=>{
                     </Message>
                 )}
                 <Form size='large'  onSubmit={handleSubmit}>
-                <Segment stacked style={{background:'#E15597'}}>
+                <Segment stacked style={{background:'#ffb5d7'}}>
                     <Form.Input fluid name='username' icon='user' iconPosition='left'
                     placeholder='Username' onChange={handleChange} value={state.username} type='text'
                     className={handleInputError('username')}/>
@@ -151,7 +151,7 @@ const Register=()=>{
                     </Button>
                 </Segment>
                 </Form>
-                <Message  style={{background:'#E15597'}}><p style={{fontWeight:'bold'}}>Already a user? <Link to='/login'>Login</Link></p></Message>
+                <Message  style={{background:'#ffb5d7'}}><p style={{fontWeight:'bold'}}>Already a user? <Link to='/login'>Login</Link></p></Message>
             </GridColumn>
         </Grid>
     );
