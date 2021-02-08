@@ -46,7 +46,7 @@ const Register=()=>{
         }
     }
 
-    const displayErrors=()=>( errorsState.map((err,i)=><p key={i}>{err.message}</p>))
+    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#282C35'}}>{err.message}</p>))
 
 
     const handleChange=(e)=>{
@@ -77,6 +77,10 @@ const Register=()=>{
         }
     }
 
+    const handleInputError=(inputName)=>{
+        return errorsState.some(err=>err.message.toLowerCase().includes(inputName))?'error':''
+    }
+
     return(
 
         <Grid textAlign='center' verticalAlign='middle' className='app'>
@@ -86,26 +90,30 @@ const Register=()=>{
                     Register for DevChat
                 </Header>
                 {errorsState.length>0 && (
-                    <Message error>
+                    <Message error  style={{background:'#ffb2d6'}}>
                         <h3>
                             {displayErrors()}
                         </h3>
                     </Message>
                 )}
-                <Form size='large' style={{background:'#E15597'}} onSubmit={handleSubmit}>
+                <Form size='large'  onSubmit={handleSubmit}>
                 <Segment stacked style={{background:'#E15597'}}>
                     <Form.Input fluid name='username' icon='user' iconPosition='left'
-                    placeholder='Username' onChange={handleChange} value={state.username} type='text' />
+                    placeholder='Username' onChange={handleChange} value={state.username} type='text'
+                    className={handleInputError('username')}/>
 
                     <Form.Input fluid name='email' icon='mail' iconPosition='left'
-                    placeholder='Email Address'  onChange={handleChange} value={state.email} type='email' />
+                    placeholder='Email Address'  onChange={handleChange} value={state.email} type='email' 
+                    className={handleInputError('email')} />
 
                     <Form.Input fluid name='password' icon='lock' iconPosition='left'
-                    placeholder='Password'  onChange={handleChange} value={state.password} type='password' />
+                    placeholder='Password'  onChange={handleChange} value={state.password} type='password'
+                    className={handleInputError('password')} />
 
 
                     <Form.Input fluid name='passwordConfirmation' icon='repeat' iconPosition='left'
-                    placeholder='Password Confirmation'  onChange={handleChange} value={state.passwordConfirmation} type='password' />
+                    placeholder='Password Confirmation'  onChange={handleChange} 
+                    className={handleInputError('password')} value={state.passwordConfirmation} type='password' />
 
                     <Button disabled={loading} className={loading?'loading':''} style={{background:'#282C35'}} fluid size='large'>
                         <p style={{color:'#E15597'}}>Submit</p>
