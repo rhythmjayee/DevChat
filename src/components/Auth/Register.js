@@ -11,9 +11,10 @@ const Register=()=>{
         password:'',
         passwordConfirmation:'',
         errorsState:[],
-        loading:false
+        loading:false,
+        success:false
     });
-    const {username,email,password,passwordConfirmation,errorsState,loading}=state;
+    const {username,email,password,passwordConfirmation,errorsState,loading,success}=state;
 
     const isFormValid=()=>{
         setstate({...state,errorsState:[],loading:true});
@@ -67,7 +68,8 @@ const Register=()=>{
                     password:'',
                     passwordConfirmation:'',
                     errorsState:[],
-                    loading:false
+                    loading:false,
+                    success:true
                 });
             })
             .catch(err=>{
@@ -93,6 +95,13 @@ const Register=()=>{
                     <Message error  style={{background:'#ffb2d6'}}>
                         <h3>
                             {displayErrors()}
+                        </h3>
+                    </Message>
+                )}
+                {success && (
+                    <Message success  style={{background:'#89f9ab'}}>
+                        <h3>
+                            Account successfully created
                         </h3>
                     </Message>
                 )}
