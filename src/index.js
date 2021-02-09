@@ -15,7 +15,7 @@ import {composeWithDevTools} from 'redux-devtools-extension';
 
 import {BrowserRouter as Router,Switch,Route,withRouter} from 'react-router-dom';
 import rootReducer from './reducers';
-import {setUser} from './actions/index'
+import {setUser,clearUser} from './actions/index'
 import Spinner from './Spinner';
 
 
@@ -29,7 +29,10 @@ const Root=(props)=>{
                 props.setUser(user);
                 props.history.push("/");
                 // console.log("useEffect");
-            }else{}
+            }else{
+                props.history.push('/login');
+                props.clearUser();
+            }
         });
     }, []);
 
@@ -46,7 +49,7 @@ const mapsStateFromProps= state =>{
     }
 }
 
-const RootWithAuth=withRouter(connect(mapsStateFromProps,{setUser})(Root));
+const RootWithAuth=withRouter(connect(mapsStateFromProps,{setUser,clearUser})(Root));
 
 ReactDOM.render(
     <Provider store={store}>
