@@ -1,15 +1,15 @@
 import React from 'react'
 
-import {Grid, GridColumn, GridRow, Header, HeaderContent, Icon,Dropdown} from 'semantic-ui-react';
+import {Grid, GridColumn, GridRow, Header, HeaderContent, Icon,Dropdown,Image} from 'semantic-ui-react';
 import firebase from '../../../firebase'
 
-const UserPanel=()=> {
+const UserPanel=(props)=> {
 
 
     const dropDownOptions=()=>[
         {  
             key:'user',
-            text: <span> Signed in as <strong>User</strong> </span>,
+            text: <span> Signed in as <strong>{props.currentUser.displayName}</strong> </span>,
             disabled: true
         },
         {
@@ -44,10 +44,12 @@ const handleSignOut=()=>{
             </GridRow>
 
             {/* User DropDown */}
-            <Header style={{padding:'0.25rem'}} as='h4' inverted>
-                <Dropdown tigger={
-                    <span>User</span>
-                } options={dropDownOptions()}/>
+            <Header style={{padding:'0.25rem',color:'white', backgroundColor:'#6956C9'}} as='h4' inverted>
+            <span style={{color:'white'}}>
+            <Image src={props.currentUser.photoURL} avatar style={{margin:'.5rem'}}/>
+            <Dropdown trigger={<span>{props.currentUser.displayName}</span>}  options={dropDownOptions()}/>
+            </span>
+                
             </Header>
         </GridColumn>
        </Grid>
