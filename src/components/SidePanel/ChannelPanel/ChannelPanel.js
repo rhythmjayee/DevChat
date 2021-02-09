@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import firebase from '../../../firebase';
 
 import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, ModalActions, ModalContent, ModalHeader} from 'semantic-ui-react';
@@ -12,11 +12,21 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
          channelRef:firebase.database().ref('channels')
      });
 
+        useEffect(() => {
+            addListener();
+        }, []);
+
+        const addListener=()=>{
+            let loadedChannels=[];
+            state.channelRef.on('child_added',snap=>{
+                loadedChannels=[...loadedChannels,snap.val()];
+                console.log(loadedChannels);
+                setstate({...state,channels:loadedChannels});
+            })
+        }
+
      const {channels,modal}=state;
 
-    //  const closeModal=()=>{
-    //     setstate({...state,modal:false});
-    //  }
      const handleChange=(e)=>{
         setstate({...state,[e.target.name]:e.target.value});
      }
@@ -55,9 +65,20 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
      const handleSubmit=(e)=>{
         e.preventDefault();
         if(isFormValid(state)){
-           
             addChannel(state);
         }
+     }
+
+     const displayChannels=(channels)=>{
+        return(
+            channels.length>0 && channels.map((ch)=>{
+                return(
+                    <MenuItem key={ch.id} onClick={()=>console.log(ch)} name={ch.name} style={{opacity:0.7}}>
+                        # {ch.name}
+                    </MenuItem>
+                )
+            })
+        )
      }
      
 
@@ -68,9 +89,10 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
                 <span>
                     <Icon name='exchange'/>
                 </span>
-                {' '}CHANNELS({channels.length})  <Icon name='add' onClick={modalHandler}/>
+                {' '}CHANNELS{' '}({channels.length})  <Icon name='add' onClick={modalHandler}/>
             </MenuItem>
             {/* Channels */}
+            {displayChannels(channels)}
         </MenuMenu>
         {/* Add channel modal */}
         <Modal basic open={modal} onClose={modalHandler}>
