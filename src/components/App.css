@@ -4,3 +4,6 @@ html,body,
     background: #282C35;
     padding:1em ;
 }
+.selected{
+    background-color: #f92772;
+}

@@ -12,7 +12,8 @@ import {setChannel} from '../../../actions/index'
          channelDetails:'',
          modal:false,
          channelRef:firebase.database().ref('channels'),
-         firstLoad:true
+         firstLoad:true,
+         activeChannel:''
      });
 
        
@@ -23,6 +24,10 @@ import {setChannel} from '../../../actions/index'
         useEffect(() => {
             setFirstChannel();
         }, [state.channels]);
+
+        useEffect(() => {
+            setActiveChannel(state.channels[0]);
+        }, [state.activeChannel]);
 
         const addListener=()=>{
             let loadedChannels=[];
@@ -37,7 +42,9 @@ import {setChannel} from '../../../actions/index'
 
         const setFirstChannel=()=>{
             if(state.firstLoad && state.channels.length>0){
+                setActiveChannel(state.channels[0]);
                 props.setChannel(state.channels[0]);
+               
             }
             setstate({...state,firstLoad:false});
         }
@@ -87,17 +94,22 @@ import {setChannel} from '../../../actions/index'
 
      const displayChannels=(channels)=>{
         return(
-            channels.length>0 && channels.map((ch)=>{
+            channels.length>0 && channels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} onClick={()=>changeChannel(ch)} name={ch.name} style={{opacity:0.7}}>
-                        # {ch.name}
+                    <MenuItem key={ch.id} active={ch.id===state.activeChannel} onClick={()=>changeChannel(ch)}  name={ch.name} style={{opacity:0.7}}>
+                        # {ch.name} {console.log(state.activeChannel)}
                     </MenuItem>
                 )
             })
         )
      }
 
+     const setActiveChannel=(channel)=>{
+        setstate({...state,activeChannel:channel.id});
+     }
+
      const changeChannel=(channel)=>{
+         setActiveChannel(channel);
         props.setChannel(channel);
      }
      
@@ -112,7 +124,7 @@ import {setChannel} from '../../../actions/index'
                 {' '}CHANNELS{' '}({channels.length})  <Icon name='add' onClick={modalHandler}/>
             </MenuItem>
             {/* Channels */}
-            {displayChannels(channels)}
+            {state.channels.length>0 && displayChannels(channels)}
         </MenuMenu>
         {/* Add channel modal */}
         <Modal basic open={modal} onClose={modalHandler}>
@@ -139,5 +151,9 @@ import {setChannel} from '../../../actions/index'
         </>
     )
 }
-
+// const mapsStateFromProps= state =>{
+//     return{
+//         currentChannel:state.channel
+//     }
+// }
 export default connect(null,{setChannel})(ChannelPanel);
