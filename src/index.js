@@ -10,11 +10,12 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import firebase from './firebase';
 import {createStore} from 'redux';
-import {Provider} from 'react-redux';
+import {Provider,connect} from 'react-redux';
 import {composeWithDevTools} from 'redux-devtools-extension';
 
 import {BrowserRouter as Router,Switch,Route,withRouter} from 'react-router-dom';
 import rootReducer from './reducers';
+import {setUser} from './actions/index'
 
 
 const store=createStore(rootReducer,composeWithDevTools());
@@ -24,6 +25,7 @@ const Root=(props)=>{
     useEffect(() => {
         firebase.auth().onAuthStateChanged(user=>{
             if(user){
+                props.setUser(user);
                 props.history.push("/");
                 // console.log("useEffect");
             }
@@ -37,7 +39,13 @@ const Root=(props)=>{
         </Switch>
 }
 
-const RootWithAuth=withRouter(Root);
+const RootWithAuth=withRouter(connect(null,{setUser})(Root));
 
-ReactDOM.render(<Provider store={store}><Router><RootWithAuth/></Router></Provider>, document.getElementById('root'));
+ReactDOM.render(
+    <Provider store={store}>
+        <Router>
+            <RootWithAuth/>
+        </Router>
+    </Provider>
+    , document.getElementById('root'));
 registerServiceWorker();
