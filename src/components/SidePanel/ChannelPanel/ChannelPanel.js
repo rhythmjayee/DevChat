@@ -2,6 +2,8 @@ import React,{useState,useEffect} from 'react';
 import firebase from '../../../firebase';
 
 import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, ModalActions, ModalContent, ModalHeader} from 'semantic-ui-react';
+import {connect} from 'react-redux';
+import {setChannel} from '../../../actions/index'
 
  const ChannelPanel = (props) => {
      const [state, setstate] = useState({
@@ -9,21 +11,35 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
          channelName:'',
          channelDetails:'',
          modal:false,
-         channelRef:firebase.database().ref('channels')
+         channelRef:firebase.database().ref('channels'),
+         firstLoad:true
      });
 
+       
         useEffect(() => {
-            addListener();
+                addListener();
         }, []);
+        
+        useEffect(() => {
+            setFirstChannel();
+        }, [state.channels]);
 
         const addListener=()=>{
             let loadedChannels=[];
-            state.channelRef.on('child_added',snap=>{
+            state.channelRef.on('child_added',snap=>{ 
                 loadedChannels.push(snap.val());
                 console.log(loadedChannels);
                 setstate({...state,channelName:'',channelDetails:'',channels:loadedChannels});
             });
-            
+            return state;
+           
+        }
+
+        const setFirstChannel=()=>{
+            if(state.firstLoad && state.channels.length>0){
+                props.setChannel(state.channels[0]);
+            }
+            setstate({...state,firstLoad:false});
         }
 
      const {channels,modal}=state;
@@ -82,7 +98,7 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
      }
 
      const changeChannel=(channel)=>{
-        // props.setC urrentChannel(channel);
+        props.setChannel(channel);
      }
      
 
@@ -124,4 +140,4 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
     )
 }
 
-export default ChannelPanel;
+export default connect(null,{setChannel})(ChannelPanel);
