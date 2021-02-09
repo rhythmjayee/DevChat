@@ -14,6 +14,10 @@ import {Provider} from 'react-redux';
 import {composeWithDevTools} from 'redux-devtools-extension';
 
 import {BrowserRouter as Router,Switch,Route,withRouter} from 'react-router-dom';
+import rootReducer from './reducers';
+
+
+const store=createStore(rootReducer,composeWithDevTools());
 
 const Root=(props)=>{
 
@@ -35,5 +39,5 @@ const Root=(props)=>{
 
 const RootWithAuth=withRouter(Root);
 
-ReactDOM.render(<Router><RootWithAuth/></Router>, document.getElementById('root'));
+ReactDOM.render(<Provider store={store}><Router><RootWithAuth/></Router></Provider>, document.getElementById('root'));
 registerServiceWorker();
