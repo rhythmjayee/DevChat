@@ -29,7 +29,7 @@ const Root=(props)=>{
                 props.setUser(user);
                 props.history.push("/");
                 // console.log("useEffect");
-            }
+            }else{}
         });
     }, []);
 
