@@ -16,6 +16,7 @@ import {composeWithDevTools} from 'redux-devtools-extension';
 import {BrowserRouter as Router,Switch,Route,withRouter} from 'react-router-dom';
 import rootReducer from './reducers';
 import {setUser} from './actions/index'
+import Spinner from './Spinner';
 
 
 const store=createStore(rootReducer,composeWithDevTools());
@@ -32,14 +33,20 @@ const Root=(props)=>{
         });
     }, []);
 
-    return <Switch>
+    return props.isLoading?<Spinner/>: (<Switch>
             <Route exact path="/" component={App}/>
             <Route path="/login" component={Login}/>
             <Route path="/register" component={Register}/>
-        </Switch>
+        </Switch>)
 }
 
-const RootWithAuth=withRouter(connect(null,{setUser})(Root));
+const mapsStateFromProps= state =>{
+    return{
+        isLoading:state.user.isLoading
+    }
+}
+
+const RootWithAuth=withRouter(connect(mapsStateFromProps,{setUser})(Root));
 
 ReactDOM.render(
     <Provider store={store}>
