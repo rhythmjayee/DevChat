@@ -73,7 +73,7 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
         return(
             channels.length>0 && channels.map((ch)=>{
                 return(
-                    <MenuItem key={ch.id} onClick={()=>console.log(ch)} name={ch.name} style={{opacity:0.7}}>
+                    <MenuItem key={ch.id} onClick={()=>changeChannel(ch)} name={ch.name} style={{opacity:0.7}}>
                         # {ch.name}
                     </MenuItem>
                 )
@@ -81,8 +81,8 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
         )
      }
 
-     const changeChannel=()=>{
-        
+     const changeChannel=(channel)=>{
+        // props.setC urrentChannel(channel);
      }
      
 
