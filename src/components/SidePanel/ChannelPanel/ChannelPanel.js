@@ -19,15 +19,18 @@ import {setChannel} from '../../../actions/index'
        
         useEffect(() => {
                 addListener();
+                return () => {
+                   removeListeners();
+                  }
         }, []);
         
         useEffect(() => {
             setFirstChannel();
-        }, [state.channels]);
+        }, [state.channels]); 
 
-        useEffect(() => {
-            setActiveChannel(state.channels[0]);
-        }, [state.activeChannel]);
+        // useEffect(() => {
+        //     setActiveChannel(state.channels[0]);
+        // }, [state.activeChannel]);
 
         const addListener=()=>{
             let loadedChannels=[];
@@ -36,8 +39,10 @@ import {setChannel} from '../../../actions/index'
                 console.log(loadedChannels);
                 setstate({...state,channelName:'',channelDetails:'',channels:loadedChannels});
             });
-            return state;
-           
+        }
+
+        const removeListeners=()=>{
+            state.channelRef.off();
         }
 
         const setFirstChannel=()=>{
