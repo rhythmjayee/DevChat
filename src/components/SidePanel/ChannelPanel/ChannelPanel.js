@@ -1,13 +1,15 @@
-import React,{useState} from 'react'
+import React,{useState} from 'react';
+import firebase from '../../../firebase';
 
 import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, ModalActions, ModalContent, ModalHeader} from 'semantic-ui-react';
 
- const ChannelPanel = () => {
+ const ChannelPanel = (props) => {
      const [state, setstate] = useState({
          channels:[],
-         channelname:'',
+         channelName:'',
          channelDetails:'',
-         modal:false
+         modal:false,
+         channelRef:firebase.database().ref('channels')
      });
 
      const {channels,modal}=state;
@@ -16,11 +18,49 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
     //     setstate({...state,modal:false});
     //  }
      const handleChange=(e)=>{
-        setstate({...state,[e.taregt.name]:e.target.value});
+        setstate({...state,[e.target.name]:e.target.value});
      }
      const modalHandler=()=>{
         setstate({...state,modal:!modal});
      }
+     const isFormValid=({channelName,channelDetails})=> channelName && channelDetails;
+
+     const addChannel=()=>{
+        const {channelRef,channelName,channelDetails}=state;
+        const {uid,displayName,photoURL}=props.currentUser;
+        const key=channelRef.push().key;
+        const newChannel={
+            id:key,
+            name:channelName,
+            details:channelDetails,
+            createdBy:{
+                id:uid,
+                name:displayName,
+                avatar:photoURL
+            }
+        }
+
+        channelRef.child(key)
+        .update(newChannel)
+        .then(()=>{
+            setstate({...state,channelName:'',channelDetails:''});
+            modalHandler();
+            console.log('channel added');
+        })
+        .catch(err=>{
+            console.error(err.message);
+        });
+
+     }
+     const handleSubmit=(e)=>{
+        e.preventDefault();
+        if(isFormValid(state)){
+           
+            addChannel(state);
+        }
+     }
+     
+
     return (
         <>
         <MenuMenu style={{marginTop:'1em',paddingBottom:'2em'}}>
@@ -36,21 +76,21 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
         <Modal basic open={modal} onClose={modalHandler}>
             <ModalHeader>Add a Channel</ModalHeader>
             <ModalContent>
-                <Form>
+                <Form onSubmit={handleSubmit}>
                     <FormField>
-                        <Input fluid label='Name of channel' name='channel' onChange={handleChange} />
+                        <Input fluid label='Name of channel' name='channelName' value={state.channelName} onChange={handleChange} />
                     </FormField>
                     <FormField>
-                        <Input fluid label='About the channel' name='channelDetails' onChange={handleChange} />
+                        <Input fluid label='About the channel' name='channelDetails'value={state.channelDetails} onChange={handleChange} />
                     </FormField>
                 </Form>
             </ModalContent>
             <ModalActions>
-                <Button color='green' inverted>
+                <Button color='green' inverted  onClick={handleSubmit}>
                     <Icon name='checkmark'/> Add
                 </Button>
-                <Button color='red' inverted>
-                    <Icon name='remove' onClick={modalHandler}/> cancel
+                <Button color='red' inverted onClick={modalHandler}>
+                    <Icon name='remove' /> cancel
                 </Button>
             </ModalActions>
         </Modal>

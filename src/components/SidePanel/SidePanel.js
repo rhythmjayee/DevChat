@@ -8,7 +8,7 @@ const SidePanel = ({currentUser}) => {
     return (
         <Menu size='large' inverted fixed='left' vertical style={{background:'#2F2F2F', fontSize:'1.2em'}}>
             <UserPanel currentUser={currentUser}/>
-            <ChannelPanel/>
+            <ChannelPanel currentUser={currentUser}/>
         </Menu>
 
     )
