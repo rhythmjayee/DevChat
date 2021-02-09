@@ -19,10 +19,11 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
         const addListener=()=>{
             let loadedChannels=[];
             state.channelRef.on('child_added',snap=>{
-                loadedChannels=[...loadedChannels,snap.val()];
+                loadedChannels.push(snap.val());
                 console.log(loadedChannels);
-                setstate({...state,channels:loadedChannels});
-            })
+                setstate({...state,channelName:'',channelDetails:'',channels:loadedChannels});
+            });
+            
         }
 
      const {channels,modal}=state;
@@ -53,9 +54,8 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
         channelRef.child(key)
         .update(newChannel)
         .then(()=>{
-            setstate({...state,channelName:'',channelDetails:''});
-            modalHandler();
-            console.log('channel added');
+            addListener();
+            modalHandler();           
         })
         .catch(err=>{
             console.error(err.message);
@@ -79,6 +79,10 @@ import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, Mod
                 )
             })
         )
+     }
+
+     const changeChannel=()=>{
+        
      }
      
 
