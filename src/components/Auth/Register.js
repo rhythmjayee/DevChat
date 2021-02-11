@@ -15,15 +15,16 @@ const Register=()=>{
         loading:false,
         success:false,
         userRef:firebase.database().ref('users')
-    });
+    });// handling local state for register component
+    
     const {username,email,password,passwordConfirmation,errorsState,loading,success}=state;
 
     const isFormValid=()=>{
-        setstate({...state,errorsState:[],loading:true});
+        setstate({...state,errorsState:[],loading:true});// clearing all errors initally and set loading to true
         let errors=[];
         let error;
         if(isFormEmpty(state)){
-            error={message:"Fill all details"};
+            error={message:"Fill all details"};// if erorrs -> setting errors to local state
             errors=[...errors,error];
             setstate({...state,errorsState:errors});
             return false;
@@ -35,7 +36,8 @@ const Register=()=>{
         }else{
             return true;
         }
-    }
+    }// fun. for checking validity of form
+
     const isFormEmpty=({username,email,password,passwordConfirmation})=>{
         return !username.length || !email.length || !password.length || !passwordConfirmation.length;
     }
@@ -49,25 +51,25 @@ const Register=()=>{
         }
     }
 
-    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#ff0033'}}>{err.message}</p>))
-
 
     const handleChange=(e)=>{
-        setstate({...state,[e.target.name]:e.target.value});
-    };
+        e.persist();
+        setstate(prevState=>({...prevState,[e.target.name]:e.target.value}));
+};
+
     const handleSubmit=(e)=>{
-        if(isFormValid()){
-            e.preventDefault();
-            console.log(state.email,state.password);
+        e.preventDefault();
+        // console.log(state.email,state.password);
+        if(isFormValid()){//creating user
             firebase
             .auth()
             .createUserWithEmailAndPassword(email,password)
             .then(createdUser=>{
-                console.log(createdUser);
+                // console.log(createdUser);
                 createdUser.user.updateProfile({
                     displayName:username,
-                    photoURL:`http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=identicon`
-                })
+                    photoURL:`http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=robohash&r=x`
+                })//md5-> create hash
                 .then(()=>{
                     saveUser(createdUser).then(()=>{
                         console.log("user Saved");
@@ -103,7 +105,9 @@ const Register=()=>{
 
     const handleInputError=(inputName)=>{
         return errorsState.some(err=>err.message.toLowerCase().includes(inputName))?'error':''
-    }
+    }// adding erorr class to input field
+
+    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#ff0033'}}>{err.message}</p>));// displaying errors
 
     return(
 
