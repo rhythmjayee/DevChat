@@ -19,16 +19,15 @@ import {setUser,clearUser} from './actions/index'
 import Spinner from './Spinner';
 
 
-const store=createStore(rootReducer,composeWithDevTools());
+const store=createStore(rootReducer,composeWithDevTools());// making of store and connecting redux-devtools
 
-const Root=(props)=>{
+const Root=(props)=>{//root component
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged(user=>{
+        firebase.auth().onAuthStateChanged(user=>{ // checking already logged In user
             if(user){
                 props.setUser(user);
-                props.history.push("/");
-                // console.log("useEffect");
+                props.history.push("/"); // ---history.push?
             }else{
                 props.history.push('/login');
                 props.clearUser();
@@ -36,11 +35,11 @@ const Root=(props)=>{
         });
     }, []);
 
-    return props.isLoading?<Spinner/>: (<Switch>
+    return props.isLoading?<Spinner/>: (<Switch> 
             <Route exact path="/" component={App}/>
             <Route path="/login" component={Login}/>
             <Route path="/register" component={Register}/>
-        </Switch>)
+        </Switch>) 
 }
 
 const mapsStateFromProps= state =>{
@@ -49,13 +48,13 @@ const mapsStateFromProps= state =>{
     }
 }
 
-const RootWithAuth=withRouter(connect(mapsStateFromProps,{setUser,clearUser})(Root));
-
+const RootWithAuth=withRouter(connect(mapsStateFromProps,{setUser,clearUser})(Root)); // withRouter->providing extra props to component..like history etc.
+//connect redux to component and mapsStateFromProps-> provide store state to compoment && redux-actions through props
 ReactDOM.render(
-    <Provider store={store}>
+    <Provider store={store}> 
         <Router>
             <RootWithAuth/>
         </Router>
     </Provider>
-    , document.getElementById('root'));
+    , document.getElementById('root')); //provinding store to all components
 registerServiceWorker();

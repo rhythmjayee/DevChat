@@ -1,6 +1,7 @@
 import {combineReducers} from 'redux';
 import * as actionTypes from '../actions/types';
 
+//Here global state changes through actions
 
 const initialUserState={
     currentUser:null,
@@ -12,18 +13,19 @@ const user_reducer=(state = initialUserState ,action)=>{
     switch(action.type){
         case actionTypes.SET_USER:
             return{
+                ...state,
                 currentUser:action.payload.currentUser,
                 isLoading:false
             }
             case actionTypes.CLEAR_USER:
             return{
-                ...initialUserState,
+                ...state,
                 isLoading:false
             }
         default:
             return state;
     }
-}
+}// global state for handling user
 
 const initalChannelState={
     currentChannel:null
@@ -40,11 +42,11 @@ const channel_reducer=(state = initalChannelState ,action)=>{
         default:
             return state;
     }
-}
+}// global state for handling channel
 
 const rootReducer= combineReducers({
     user:user_reducer,
     channel:channel_reducer
-});
+});// combining all  reducers for single global state
 
 export default rootReducer;
