@@ -138,7 +138,7 @@ import {setChannel} from '../../../actions/index'
                 {' '}CHANNELS{' '}({channels.length})  <Icon name='add' onClick={modalHandler}/>
             </MenuItem>
             {/* Channels */}
-            {props.currentChannel && state.channels.length>0 && displayChannels(channels)}
+            {props.currentChannel && state.channels.length>0?displayChannels(channels):<Button style={{backgroundColor:'#515050'}} className={'loading'}></Button>}
         </MenuMenu>
         {/* Add channel modal */}
         <Modal basic open={modal} onClose={modalHandler}>
