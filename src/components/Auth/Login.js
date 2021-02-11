@@ -18,8 +18,6 @@ const Login=()=>{
         return email && password;
     }
 
-    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#ff0033'}}>{err.message}</p>))
-
 
     const handleChange=(e)=>{
         setstate({...state,[e.target.name]:e.target.value});
@@ -43,6 +41,8 @@ const Login=()=>{
     const handleInputError=(inputName)=>{
         return errorsState.some(err=>err.message.toLowerCase().includes(inputName))?'error':''
     }
+
+    const displayErrors=()=>( errorsState.map((err,i)=><p key={i} style={{color:'#ff0033'}}>{err.message}</p>))
 
     return(
 
