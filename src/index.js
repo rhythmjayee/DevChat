@@ -26,6 +26,7 @@ const Root=(props)=>{//root component
     useEffect(() => {
         firebase.auth().onAuthStateChanged(user=>{ // checking already logged In user
             if(user){
+                //triggering actions
                 props.setUser(user);
                 props.history.push("/"); // ---history.push?
             }else{

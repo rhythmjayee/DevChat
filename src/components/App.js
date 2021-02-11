@@ -24,7 +24,7 @@ const App=({currentUser})=>{
       </GridColumn>
    </Grid>
   )
-}
+}// providing user state as prop to all children components from the store
 const mapStatesFromProps= state =>{
   return{
       currentUser:state.user.currentUser
