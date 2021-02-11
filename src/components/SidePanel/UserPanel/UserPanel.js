@@ -27,6 +27,9 @@ const handleSignOut=()=>{
     .then(res=>{
         console.log('signOut!!');
     })
+    .catch(err=>{
+        console.error(err.message);
+    })
 }
 
 

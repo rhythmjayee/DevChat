@@ -7,13 +7,13 @@ import {setChannel} from '../../../actions/index'
 
  const ChannelPanel = (props) => {
      const [state, setstate] = useState({
+        // activeChannel:'',
          channels:[],
          channelName:'',
          channelDetails:'',
          modal:false,
          channelRef:firebase.database().ref('channels'),
-         firstLoad:true,
-         activeChannel:''
+        //  firstLoad:true,
      });
 
        
@@ -32,12 +32,15 @@ import {setChannel} from '../../../actions/index'
         //     setActiveChannel(state.channels[0]);
         // }, [state.activeChannel]);
 
+        const {channels,modal}=state;
+
         const addListener=()=>{
             let loadedChannels=[];
-            state.channelRef.on('child_added',snap=>{ 
+            //listen channel ref
+             state.channelRef.on('child_added',snap=>{ 
                 loadedChannels.push(snap.val());
-                console.log(loadedChannels);
-                setstate({...state,channelName:'',channelDetails:'',channels:loadedChannels});
+                // console.log(snap.val());
+                setstate({...state,channels:loadedChannels});
             });
         }
 
@@ -45,16 +48,55 @@ import {setChannel} from '../../../actions/index'
             state.channelRef.off();
         }
 
+        const addChannel=()=>{
+            const {channelRef,channelName,channelDetails}=state;
+            const {uid,displayName,photoURL}=props.currentUser;
+            const key=channelRef.push().key;
+            const newChannel={
+                id:key,
+                name:channelName,
+                details:channelDetails,
+                createdBy:{
+                    id:uid,
+                    name:displayName,
+                    avatar:photoURL
+                }
+            }
+    
+            channelRef.child(key)
+            .update(newChannel)
+            .then(()=>{
+                // addListener();
+                // modalHandler();  
+                setstate({...state,channelName:'',channelDetails:'',modal:!modal})         
+            })
+            .catch(err=>{
+                console.error(err.message);
+            });
+    
+         }
+
         const setFirstChannel=()=>{
-            if(state.firstLoad && state.channels.length>0){
-                setActiveChannel(state.channels[0]);
-                props.setChannel(state.channels[0]);
+            if(state.channels.length>0){
+                // setActiveChannel(state.channels[0]);
+                // props.setChannel(state.channels[0]);
+                changeChannel(state.channels[0]);
                
             }
-            setstate({...state,firstLoad:false});
+            // console.log('----')
+            // setstate({...state,firstLoad:false});
         }
 
-     const {channels,modal}=state;
+         const changeChannel=(channel)=>{
+            props.setChannel(channel);
+            // setActiveChannel(channel);
+         }  
+         
+        //  const setActiveChannel=(channel)=>{
+            // console.log(channel.id);
+        //     setstate(prevState=>({...prevState,activeChannel:channel.id}));
+        //  }
+     
 
      const handleChange=(e)=>{
         setstate({...state,[e.target.name]:e.target.value});
@@ -64,32 +106,7 @@ import {setChannel} from '../../../actions/index'
      }
      const isFormValid=({channelName,channelDetails})=> channelName && channelDetails;
 
-     const addChannel=()=>{
-        const {channelRef,channelName,channelDetails}=state;
-        const {uid,displayName,photoURL}=props.currentUser;
-        const key=channelRef.push().key;
-        const newChannel={
-            id:key,
-            name:channelName,
-            details:channelDetails,
-            createdBy:{
-                id:uid,
-                name:displayName,
-                avatar:photoURL
-            }
-        }
-
-        channelRef.child(key)
-        .update(newChannel)
-        .then(()=>{
-            addListener();
-            modalHandler();           
-        })
-        .catch(err=>{
-            console.error(err.message);
-        });
-
-     }
+    
      const handleSubmit=(e)=>{
         e.preventDefault();
         if(isFormValid(state)){
@@ -97,27 +114,19 @@ import {setChannel} from '../../../actions/index'
         }
      }
 
+    
      const displayChannels=(channels)=>{
         return(
             channels.length>0 && channels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} active={ch.id===state.activeChannel} onClick={()=>changeChannel(ch)}  name={ch.name} style={{opacity:0.7}}>
-                        # {ch.name} {console.log(state.activeChannel)}
+                    <MenuItem key={ch.id} active={ch.id===props.currentChannel.id} onClick={()=>changeChannel(ch)}  name={ch.name} style={{opacity:0.7}}>
+                        # {ch.name} 
+                        {/* {console.log(ch.id,props.currentChannel.id)} */}
                     </MenuItem>
                 )
             })
         )
      }
-
-     const setActiveChannel=(channel)=>{
-        setstate({...state,activeChannel:channel.id});
-     }
-
-     const changeChannel=(channel)=>{
-         setActiveChannel(channel);
-        props.setChannel(channel);
-     }
-     
 
     return (
         <>
@@ -129,7 +138,7 @@ import {setChannel} from '../../../actions/index'
                 {' '}CHANNELS{' '}({channels.length})  <Icon name='add' onClick={modalHandler}/>
             </MenuItem>
             {/* Channels */}
-            {state.channels.length>0 && displayChannels(channels)}
+            {props.currentChannel && state.channels.length>0 && displayChannels(channels)}
         </MenuMenu>
         {/* Add channel modal */}
         <Modal basic open={modal} onClose={modalHandler}>
@@ -156,9 +165,9 @@ import {setChannel} from '../../../actions/index'
         </>
     )
 }
-// const mapsStateFromProps= state =>{
-//     return{
-//         currentChannel:state.channel
-//     }
-// }
-export default connect(null,{setChannel})(ChannelPanel);
+const mapsStateFromProps= state =>{
+    return{
+        currentChannel:state.channel.currentChannel
+    }
+}
+export default connect(mapsStateFromProps,{setChannel})(ChannelPanel);
