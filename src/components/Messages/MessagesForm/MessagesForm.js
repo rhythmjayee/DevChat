@@ -5,6 +5,7 @@ import {Header,Segment,Input,Icon, ButtonGroup,Button} from 'semantic-ui-react';
 import { v4 as uuidv4 } from 'uuid';
 
 import FileModal from '../FileModal/FileModal'
+import Progressbar from '../ProgessBar/Progressbar'
 
 const MessagesForm = (props) => {
 
@@ -73,7 +74,7 @@ const MessagesForm = (props) => {
             setstate({...state,errors:state.errors.concat({message:'Add a message'})});
         }
     }
-    const {uploadTask,uploadState}=uploadFileState;
+    const {uploadTask,uploadState,percentUploaded}=uploadFileState;
 
     const uploadFile=(file,metadata)=>{
         // console.log(file,metadata);
@@ -91,9 +92,10 @@ const MessagesForm = (props) => {
    
     useEffect(() => {
         // console.log('1');
-        console.log(uploadTask,uploadState);
+        // console.log(uploadTask,uploadState); 
         uploadState==='uploading' && uploadTask.on('state_changed',snap=>{
             const percentageUpload=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+            console.log(percentageUpload);
             uploadSetstate({...uploadFileState,percentUploaded:percentageUpload})
         },
         err=>{
@@ -101,7 +103,8 @@ const MessagesForm = (props) => {
             uploadSetstate({
                 ...uploadFileState,
                 uploadState:'error',
-                uploadTask:null
+                uploadTask:null,
+                percentUploaded:0
             });
 
             setstate({
@@ -121,7 +124,8 @@ const MessagesForm = (props) => {
                 uploadSetstate({
                     ...uploadFileState,
                     uploadState:'error',
-                    uploadTask:null
+                uploadTask:null,
+                percentUploaded:0
                 });
     
                 setstate({
@@ -131,7 +135,7 @@ const MessagesForm = (props) => {
             })
         }
         )
-    }, [uploadState]);
+    }, [uploadState,percentUploaded]);
 
     const sendFileMessage=(fileUrl,ref,pathToUpload)=>{
         // console.log('3');
@@ -175,12 +179,17 @@ const MessagesForm = (props) => {
                       color='teal' content='upload Media' labelPosition='right' icon='cloud upload'
                       onClick={toggleModal}
                   />
-                  <FileModal
+                 
+              </ButtonGroup>
+              <FileModal
                     modal={modal}
                     closeModal={toggleModal}
                     uploadFile={uploadFile}
                   />
-              </ButtonGroup>
+                  <Progressbar
+                      uploadState={uploadState}
+                      percentUploaded={percentUploaded}
+                  />
         </Segment>
     )
 }
