@@ -135,7 +135,7 @@ const MessagesForm = (props) => {
             })
         }
         )
-    }, [uploadState,percentUploaded]);
+    }, [uploadState]);
 
     const sendFileMessage=(fileUrl,ref,pathToUpload)=>{
         // console.log('3');
