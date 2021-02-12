@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import {Comment, CommentAuthor, CommentAvatar, CommentContent, CommentGroup, CommentMetadata, CommentText, Segment} from 'semantic-ui-react';
+import {Comment, CommentAuthor, CommentAvatar, CommentContent, Image,CommentGroup, CommentMetadata, CommentText, Segment} from 'semantic-ui-react';
 
 const isOwnMessage=(message,user)=>{
     return message.user.id===user.uid?'message__self':'';
@@ -8,6 +8,10 @@ const isOwnMessage=(message,user)=>{
 
 const timeFromNow=(time)=>{
     return moment(time).fromNow();
+}
+
+const isImage=(message)=>{
+    return message.hasOwnProperty('image') && !message.hasOwnProperty('content');
 }
 
 const Message = ({message,user}) => {
@@ -19,7 +23,10 @@ const Message = ({message,user}) => {
             <CommentContent className={isOwnMessage(message,user)}>
                 <CommentAuthor as='a' >{message.user.name}</CommentAuthor>
                 <CommentMetadata>{timeFromNow(message.timestamp)}</CommentMetadata>
-                <CommentText>{message.content}</CommentText>
+                {isImage(message)?
+                <Image src={message.image} className='message__image' />
+                : <CommentText>{message.content}</CommentText>
+                }
             </CommentContent>
         </Comment>
     )

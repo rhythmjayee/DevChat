@@ -34,3 +34,7 @@ html,body,
     border-left:2px solid pink;
     padding-left:8px
 }
+.message__image{
+    padding:1em;
+    
+}

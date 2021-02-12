@@ -1,6 +1,10 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import firebase from '../../../firebase';
 import {Header,Segment,Input,Icon, ButtonGroup,Button} from 'semantic-ui-react';
+
+import { v4 as uuidv4 } from 'uuid';
+
+import FileModal from '../FileModal/FileModal'
 
 const MessagesForm = (props) => {
 
@@ -9,14 +13,29 @@ const MessagesForm = (props) => {
         channel:props.currentChannel,
         user:props.currentUser,
         errors:[],
-        loading:false
+        loading:false,
+        modal:false,
     });
+
+    const [uploadFileState, uploadSetstate] = useState({
+        uploadState:'',
+        uploadTask:null,
+        storageRef:firebase.storage().ref(),
+        percentUploaded:0
+    });
+
+    
+
+    const toggleModal=()=>{
+        setstate({...state,modal:!state.modal});
+    }
 
     const InputHandler=(e)=>{
         setstate({...state,[e.target.name]:e.target.value});
     }
 
-    const createMessage=()=>{
+    const createMessage=(fileUrl=null)=>{
+        // console.log('4');
         const message={
             timestamp:firebase.database.ServerValue.TIMESTAMP,
             user:{
@@ -24,8 +43,13 @@ const MessagesForm = (props) => {
                 name:state.user.displayName,
                 avatar:state.user.photoURL
             },
-            content:state.message
         };
+
+        if(fileUrl!==null){
+            message['image']=fileUrl;
+        }else{
+            message['content']=state.message;
+        }
         return message;
     }
 
@@ -49,8 +73,88 @@ const MessagesForm = (props) => {
             setstate({...state,errors:state.errors.concat({message:'Add a message'})});
         }
     }
+    const {uploadTask,uploadState}=uploadFileState;
 
-    const {errors,loading}=state;
+    const uploadFile=(file,metadata)=>{
+        // console.log(file,metadata);
+        
+        const filePath=`chat/public/${uuidv4()}.jpg`;
+        console.log(uploadTask,uploadState);
+        uploadSetstate({
+            ...uploadFileState,
+            uploadState:'uploading',
+            uploadTask:uploadFileState.storageRef.child(filePath).put(file,metadata)
+        });
+        console.log(uploadTask,uploadState);
+
+    }
+   
+    useEffect(() => {
+        // console.log('1');
+        console.log(uploadTask,uploadState);
+        uploadState==='uploading' && uploadTask.on('state_changed',snap=>{
+            const percentageUpload=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+            uploadSetstate({...uploadFileState,percentUploaded:percentageUpload})
+        },
+        err=>{
+            console.error(err);
+            uploadSetstate({
+                ...uploadFileState,
+                uploadState:'error',
+                uploadTask:null
+            });
+
+            setstate({
+                ...state,
+                errors:state.errors.concat(err),
+            });
+        }
+        ,()=>{
+            // console.log('2');
+            const pathToUpload=state.channel.id;
+            const ref=props.messagesRef;
+            uploadFileState.uploadTask.snapshot.ref.getDownloadURL().then(downloadUrl=>{
+                sendFileMessage(downloadUrl,ref,pathToUpload);
+            })
+            .catch(err=>{
+                console.error(err);
+                uploadSetstate({
+                    ...uploadFileState,
+                    uploadState:'error',
+                    uploadTask:null
+                });
+    
+                setstate({
+                    ...state,
+                    errors:state.errors.concat(err),
+                });
+            })
+        }
+        )
+    }, [uploadState]);
+
+    const sendFileMessage=(fileUrl,ref,pathToUpload)=>{
+        // console.log('3');
+        ref.child(pathToUpload)
+        .push()
+        .set(createMessage(fileUrl))
+        .then(()=>{
+            uploadSetstate({
+                ...uploadFileState,
+                uploadState:'done',
+            });
+        })
+        .catch(err=>{
+            console.error(err);
+            setstate({
+                ...state,
+                errors:state.errors.concat(err)
+            })
+        })
+    }
+
+
+    const {errors,loading,modal}=state;
     return (
         <Segment className='message__form'>
             <Input fluid name='message' style={{marginBottom:'0.7em'}}
@@ -69,6 +173,12 @@ const MessagesForm = (props) => {
                   />
                   <Button
                       color='teal' content='upload Media' labelPosition='right' icon='cloud upload'
+                      onClick={toggleModal}
+                  />
+                  <FileModal
+                    modal={modal}
+                    closeModal={toggleModal}
+                    uploadFile={uploadFile}
                   />
               </ButtonGroup>
         </Segment>
