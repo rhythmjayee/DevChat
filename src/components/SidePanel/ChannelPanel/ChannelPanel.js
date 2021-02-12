@@ -119,7 +119,7 @@ import {setChannel} from '../../../actions/index'
         return(
             channels.length>0 && channels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} active={ch.id===props.currentChannel.id} onClick={()=>changeChannel(ch)}  name={ch.name} style={{opacity:0.7}}>
+                    <MenuItem key={ch.id} active={ch.id===props.currentChannel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
                         # {ch.name} 
                         {/* {console.log(ch.id,props.currentChannel.id)} */}
                     </MenuItem>

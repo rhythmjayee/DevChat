@@ -6,12 +6,18 @@ html,body,
 }
 .selected{
     background-color: #f92772;
+    color:#f92772
 }
 /* Messages.js */
 .messages{
-  height:70vh;
-    overflow-y:scroll
+  height:600px;
+    overflow-y:scroll;
+    -ms-overflow-style: none;
 }
+.messages::-webkit-scrollbar {
+  display: none;
+}
+
 
 /* MessagesForm.js */
 .message__form{
