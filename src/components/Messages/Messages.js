@@ -91,6 +91,9 @@ const Messages = (props) => {
             return acc;
         },[]);
         setSearchTerm({...seachTerm,searchResults:searchResults,searchLoading:false});
+
+        // setTimeout(()=>{
+        // },500);
     }
 
     const displayMessages=(!state.messagesLoading && state.messages.length>0 && state.messages.map(message=>{
@@ -131,12 +134,13 @@ const Messages = (props) => {
                 channelName={displayChannelName(channel)}
                 uniqueUsers={count}
                 handleSearchChange={handleSearchChange}
+                searchLoading={seachTerm.searchLoading}
             />
             <Segment >
                 <CommentGroup className='messages'>
                     {/* messages */}
                     {/* {console.log(messages)} */}
-                        {state.messagesLoading?'Loading....':(seachTerm.input?searchMessages:displayMessages) }
+                        {(state.messagesLoading || seachTerm.searchLoading)?'Loading....':(seachTerm.input?searchMessages:displayMessages) }
                 </CommentGroup>
             </Segment>
             <MessagesForm
