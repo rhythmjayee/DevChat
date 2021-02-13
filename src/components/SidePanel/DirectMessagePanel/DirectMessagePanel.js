@@ -2,8 +2,12 @@ import React,{useState,useEffect} from 'react';
 import firebase from '../../../firebase';
 import {Menu,Icon, MenuMenu, MenuItem} from 'semantic-ui-react';
 
+import {connect} from 'react-redux';
+import {setChannel,setPrivateChannel} from '../../../actions/index'
+
 const DirectMessagePanel = (props) => {
     const [state, setstate] = useState({
+        activeChannel:'',
         user:props.currentUser,
         users:[],
         userLoading:true,
@@ -12,7 +16,7 @@ const DirectMessagePanel = (props) => {
         presenceRef:firebase.database().ref('presence')
     });
 
-    const {users} =state;
+    const {users,userLoading} =state;
     useEffect(() => {
         if(state.user){
             addListeners(state.user.uid);
@@ -20,7 +24,7 @@ const DirectMessagePanel = (props) => {
         return () => {
             removeListeners();
            }
-    }, [users.length]);
+    }, [userLoading]);
 
     const removeListeners=()=>{
         state.userRef.off();
@@ -86,6 +90,26 @@ const DirectMessagePanel = (props) => {
         return user.status === 'online';
     }
 
+    const changeChannel =(user)=>{
+        const channelId=getChannelId(user.uid);
+        const channelData={
+            id:channelId,
+            name:user.name
+        };
+        props.setChannel(channelData);
+        props.setPrivateChannel(true);
+        setActiveChannel(user.uid);
+    }
+
+    const setActiveChannel=(userId)=>{
+        setstate({...state,activeChannel:userId});
+    }
+
+    const getChannelId=(userId)=>{
+        const currentUserId=state.user.uid;
+        return userId<currentUserId ? `${userId}/${currentUserId}` : `${currentUserId}/${userId}`;
+    }
+
 
     return (
        <MenuMenu className='menu' >
@@ -99,8 +123,10 @@ const DirectMessagePanel = (props) => {
             {state.users.map(user=>{
                 return <MenuItem
                 key={user.uid}
-                onClick={()=>console.log(user)}
+                onClick={()=>changeChannel(user)}
                 style={{opacity:1,fontStyle:'italic'}}
+                active={props.isPrivateChannel && user.uid===state.activeChannel}
+                color='violet'
                 >
                 <Icon
                     name='circle'
@@ -113,4 +139,4 @@ const DirectMessagePanel = (props) => {
     )
 }
 
-export default DirectMessagePanel
+export default connect(null,{setChannel,setPrivateChannel})(DirectMessagePanel);

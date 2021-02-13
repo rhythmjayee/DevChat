@@ -3,7 +3,7 @@ import firebase from '../../../firebase';
 
 import {FormField, Icon, Input, Menu, MenuItem, MenuMenu,Form,Button, Modal, ModalActions, ModalContent, ModalHeader} from 'semantic-ui-react';
 import {connect} from 'react-redux';
-import {setChannel} from '../../../actions/index'
+import {setChannel,setPrivateChannel} from '../../../actions/index'
 
  const ChannelPanel = (props) => {
      const [state, setstate] = useState({
@@ -89,6 +89,7 @@ import {setChannel} from '../../../actions/index'
 
          const changeChannel=(channel)=>{
             props.setChannel(channel);
+            props.setPrivateChannel(false);
             // setActiveChannel(channel);
          }  
          
@@ -170,4 +171,4 @@ const mapsStateFromProps= state =>{
         currentChannel:state.channel.currentChannel
     }
 }
-export default connect(mapsStateFromProps,{setChannel})(ChannelPanel);
+export default connect(mapsStateFromProps,{setChannel,setPrivateChannel})(ChannelPanel);

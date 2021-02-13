@@ -55,12 +55,14 @@ const MessagesForm = (props) => {
     }
 
     const sendMessage=()=>{
-        const {messagesRef}=props;
+        const {getMessagesRef}=props;
         const {message,loading,channel}=state;
 
         if(message){
             setstate({...state,loading:true});
-            messagesRef.child(channel.id)
+
+            const ref=getMessagesRef();
+            ref.child(channel.id)
             .push()
             .set(createMessage())
             .then(()=>{
@@ -79,7 +81,7 @@ const MessagesForm = (props) => {
     const uploadFile=(file,metadata)=>{
         // console.log(file,metadata);
         
-        const filePath=`chat/public/${uuidv4()}.jpg`;
+        const filePath=`${getFilePath()}/${uuidv4()}.jpg`;
         console.log(uploadTask,uploadState);
         uploadSetstate({
             ...uploadFileState,
@@ -88,6 +90,10 @@ const MessagesForm = (props) => {
         });
         console.log(uploadTask,uploadState);
 
+    }
+
+    const getFilePath=()=>{
+        return props.isPrivateChannel? `chat/private-${state.channel.id}` : `chat/public`
     }
    
     useEffect(() => {
@@ -115,7 +121,7 @@ const MessagesForm = (props) => {
         ,()=>{
             // console.log('2');
             const pathToUpload=state.channel.id;
-            const ref=props.messagesRef;
+            const ref=props.getMessagesRef();
             uploadFileState.uploadTask.snapshot.ref.getDownloadURL().then(downloadUrl=>{
                 sendFileMessage(downloadUrl,ref,pathToUpload);
             })

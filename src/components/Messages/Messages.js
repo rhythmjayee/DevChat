@@ -10,10 +10,12 @@ import firebase from '../../firebase';
 const Messages = (props) => {
     const [state, setstate] = useState({
         messagesRef:firebase.database().ref('messages'),
+        privateMessageRef:firebase.database().ref('privateMessages'),
         channel:props.currentChannel,
         user:props.currentUser,
         messages:[],
         messagesLoading:true,
+        privateChannel:props.isPrivateChannel
     });
 
     const [userCount, setUserCountstate] = useState({
@@ -46,7 +48,8 @@ const Messages = (props) => {
 
     const addMessageListeners=(channelId)=>{
         let loadedMesages=[];
-        state.messagesRef.child(channelId).on('child_added',snap=>{
+        const ref=getMessagesRef();
+        ref.child(channelId).on('child_added',snap=>{
             loadedMesages.push(snap.val());
             // console.log(loadedMesages);
             setstate({
@@ -59,6 +62,11 @@ const Messages = (props) => {
         })
        
     };
+
+    const getMessagesRef=()=>{
+        const {messagesRef,privateMessageRef,privateChannel}=state
+        return privateChannel?privateMessageRef:messagesRef;
+    }
 
     const countUniqueUsers=(messages)=>{
         const uniqueUsers=messages.reduce((acc,message)=>{
@@ -121,11 +129,11 @@ const Messages = (props) => {
    
 
     const displayChannelName=(channel)=>{
-        return channel? `#${channel.name}` :"";
+        return channel? `${state.privateChannel ? '@ ' :'# '}${channel.name}` :"";
     }
 
 
-    const {messagesRef,channel,user,messages}= state;
+    const {messagesRef,channel,user,messages,privateChannel}= state;
     const{count} =userCount;
    
     return (
@@ -135,6 +143,7 @@ const Messages = (props) => {
                 uniqueUsers={count}
                 handleSearchChange={handleSearchChange}
                 searchLoading={seachTerm.searchLoading}
+                isPrivateChannel={privateChannel}
             />
             <Segment >
                 <CommentGroup className='messages'>
@@ -147,6 +156,8 @@ const Messages = (props) => {
                 messagesRef={messagesRef}
                 currentChannel={channel}
                 currentUser={user}
+                isPrivateChannel={privateChannel}
+                getMessagesRef={getMessagesRef}
             />
         </>
     )
