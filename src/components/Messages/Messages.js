@@ -20,6 +20,12 @@ const Messages = (props) => {
         count:''
     });
 
+    const [seachTerm,setSearchTerm]=useState({
+        input:'',
+        searchLoading:false,
+        searchResults:[]
+    });
+
     useEffect(() => {
         const {channel,user}=state;
         if(channel && user){
@@ -67,6 +73,26 @@ const Messages = (props) => {
         setUserCountstate({...userCount,count:numUniqueUsers});
     }
 
+    const handleSearchChange=(e)=>{
+        setSearchTerm({...seachTerm,input:e.target.value,searchLoading:true});
+    }
+        const {input}=seachTerm;
+    useEffect(() => {
+        handleSearchMessages()
+    }, [input]);
+
+    const handleSearchMessages =()=>{
+        const channelMessages=[...state.messages];
+        const regex=new RegExp(seachTerm.input,'gi');
+        const searchResults=channelMessages.reduce((acc,message)=>{
+            if(message.content && message.content.match(regex)){
+                acc.push(message);
+            }
+            return acc;
+        },[]);
+        setSearchTerm({...seachTerm,searchResults:searchResults,searchLoading:false});
+    }
+
     const displayMessages=(!state.messagesLoading && state.messages.length>0 && state.messages.map(message=>{
             return (
             <Message 
@@ -77,6 +103,17 @@ const Messages = (props) => {
         )
         })
     )
+
+    const searchMessages=(!seachTerm.searchLoading && seachTerm.searchResults.length>0 && seachTerm.searchResults.map(message=>{
+        return (
+        <Message 
+        key={message.timestamp}
+            message={message}
+            user={state.user}
+        />
+    )
+    })
+)
 
    
 
@@ -93,12 +130,13 @@ const Messages = (props) => {
             <MessagesHeader
                 channelName={displayChannelName(channel)}
                 uniqueUsers={count}
+                handleSearchChange={handleSearchChange}
             />
             <Segment >
                 <CommentGroup className='messages'>
                     {/* messages */}
                     {/* {console.log(messages)} */}
-                        {state.messagesLoading?'Loading....':displayMessages }
+                        {state.messagesLoading?'Loading....':(seachTerm.input?searchMessages:displayMessages) }
                 </CommentGroup>
             </Segment>
             <MessagesForm
