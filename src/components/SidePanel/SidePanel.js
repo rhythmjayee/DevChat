@@ -10,7 +10,7 @@ const SidePanel = ({currentUser}) => {
         <Menu size='large' inverted fixed='left' vertical style={{background:'#2F2F2F', fontSize:'1.2em'}}>
             <UserPanel currentUser={currentUser}/>
             <ChannelPanel currentUser={currentUser}/>
-            <DirectMessagePanel/>
+            <DirectMessagePanel currentUser={currentUser}/>
         </Menu>
 
     )
