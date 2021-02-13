@@ -177,7 +177,7 @@ const MessagesForm = (props) => {
                   />
                   <Button
                       color='teal' content='upload Media' labelPosition='right' icon='cloud upload'
-                      onClick={toggleModal}
+                      onClick={toggleModal} disabled={uploadState==='uploading'}
                   />
                  
               </ButtonGroup>
