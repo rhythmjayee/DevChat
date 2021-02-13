@@ -12,11 +12,21 @@ const DirectMessagePanel = (props) => {
         presenceRef:firebase.database().ref('presence')
     });
 
+    const {users} =state;
     useEffect(() => {
         if(state.user){
             addListeners(state.user.uid);
         }
-    }, []);
+        return () => {
+            removeListeners();
+           }
+    }, [users.length]);
+
+    const removeListeners=()=>{
+        state.userRef.off();
+        state.connectedRef.off();
+        state.presenceRef.off();
+    }
 
     const addListeners=(currentUserId)=>{
         let loadedUsers=[];
@@ -77,7 +87,6 @@ const DirectMessagePanel = (props) => {
     }
 
 
-    const {users}=state;
     return (
        <MenuMenu className='menu' >
            <MenuItem>
