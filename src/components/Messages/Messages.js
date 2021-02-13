@@ -13,7 +13,11 @@ const Messages = (props) => {
         channel:props.currentChannel,
         user:props.currentUser,
         messages:[],
-        messagesLoading:true
+        messagesLoading:true,
+    });
+
+    const [userCount, setUserCountstate] = useState({
+        count:''
     });
 
     useEffect(() => {
@@ -45,7 +49,22 @@ const Messages = (props) => {
                 messagesLoading:false
             });  
             // displayMessages();
+            countUniqueUsers(loadedMesages);
         })
+       
+    };
+
+    const countUniqueUsers=(messages)=>{
+        const uniqueUsers=messages.reduce((acc,message)=>{
+            if(!acc.includes(message.user.id)){
+                acc.push(message.user.id);
+            }
+            return acc;
+        },[]);
+
+        const plural=uniqueUsers.length>1 || uniqueUsers.length.length==0;
+        const numUniqueUsers=`${uniqueUsers.length} ${plural?'Users':"User"}`;
+        setUserCountstate({...userCount,count:numUniqueUsers});
     }
 
     const displayMessages=(!state.messagesLoading && state.messages.length>0 && state.messages.map(message=>{
@@ -59,10 +78,22 @@ const Messages = (props) => {
         })
     )
 
+   
+
+    const displayChannelName=(channel)=>{
+        return channel? `#${channel.name}` :"";
+    }
+
+
     const {messagesRef,channel,user,messages}= state;
+    const{count} =userCount;
+   
     return (
         <>
-            <MessagesHeader/>
+            <MessagesHeader
+                channelName={displayChannelName(channel)}
+                uniqueUsers={count}
+            />
             <Segment >
                 <CommentGroup className='messages'>
                     {/* messages */}
