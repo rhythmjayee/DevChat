@@ -8,6 +8,14 @@ html,body,
     background-color: #f92772;
     color:#f92772
 }
+
+/* sidePanel */
+
+.menu{
+    margin-top:5em;
+    padding-bottom:2em;
+}
+
 /* Messages.js */
 .messages{
   height:65vh;
