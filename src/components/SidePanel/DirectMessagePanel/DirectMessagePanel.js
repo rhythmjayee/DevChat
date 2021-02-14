@@ -112,13 +112,13 @@ const DirectMessagePanel = (props) => {
 
 
     return (
-       <MenuMenu className='menu' >
-           <MenuItem>
-               <span>
-                   <Icon name='mail'/> DIRECT MESSAGES
-               </span>{' '}
-               ({users.length})
-           </MenuItem>
+    <MenuMenu className='menu' >
+        <MenuItem>
+            <span>
+                <Icon name='mail'/> DIRECT MESSAGES
+            </span>{' '}
+            ({users.length})
+        </MenuItem>
            {/* User to Send Direct Messages */}
             {state.users.map(user=>{
                 return <MenuItem
