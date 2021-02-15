@@ -47,34 +47,44 @@ const Messages = (props) => {
         let loadedMesages=[];
         const ref=getMessagesRef();
 
-        
-        callForMessages(loadedMesages,ref,channelId).then(()=>{
-            console.log('------')
-                if(state.messages.length===0){
-                    setstate({...state,messagesLoading:false})
-                }
-            })
+        ref.child(channelId).on('child_added',snap=>{
+            loadedMesages.push(snap.val());
+            // console.log(loadedMesages);
+            setstate({
+                ...state,
+                messages:loadedMesages,
+                messagesLoading:false
+            });  
+            // displayMessages();
+            countUniqueUsers(loadedMesages);
+        })
+        // callForMessages(loadedMesages,ref,channelId).then(()=>{
+        //     console.log('------')
+        //         if(state.messages.length===0){
+        //             setstate({...state,messagesLoading:false})
+        //         }
+        //     })
        
        
     };
-    const callForMessages=(loadedMesages,ref,channelId)=>{
-        return new Promise(function(resolve) {
-            setTimeout(()=>{
-                ref.child(channelId).on('child_added',snap=>{
-                    loadedMesages.push(snap.val());
-                    // console.log(loadedMesages);
-                    setstate({
-                        ...state,
-                        messages:loadedMesages,
-                        messagesLoading:false
-                    });  
-                    // displayMessages();
-                    countUniqueUsers(loadedMesages);
-                })
-                resolve();
-                },5000);
-        });
-    }
+    // const callForMessages=(loadedMesages,ref,channelId)=>{
+    //     return new Promise(function(resolve) {
+    //         setTimeout(()=>{
+    //             ref.child(channelId).on('child_added',snap=>{
+    //                 loadedMesages.push(snap.val());
+    //                 // console.log(loadedMesages);
+    //                 setstate({
+    //                     ...state,
+    //                     messages:loadedMesages,
+    //                     messagesLoading:false
+    //                 });  
+    //                 // displayMessages();
+    //                 countUniqueUsers(loadedMesages);
+    //             })
+    //             resolve();
+    //             },5000);
+    //     });
+    // }
 
     const getMessagesRef=()=>{
         const {messagesRef,privateMessageRef,privateChannel}=state
@@ -162,7 +172,7 @@ const Messages = (props) => {
                 <CommentGroup className='messages'>
                     {/* messages */}
                     {/* {console.log(messages)} */}
-                        {(state.messagesLoading || seachTerm.searchLoading)?'Loading....':(messages.length===0 ?'No Messages...Start Conversation':(seachTerm.input?searchMessages:displayMessages)) }
+                        {(state.messagesLoading || seachTerm.searchLoading)?'Loading....':(seachTerm.input?searchMessages:displayMessages) }
                 </CommentGroup>
             </Segment>
             <MessagesForm

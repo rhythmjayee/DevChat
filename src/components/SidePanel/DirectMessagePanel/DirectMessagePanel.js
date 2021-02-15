@@ -32,9 +32,23 @@ const DirectMessagePanel = (props) => {
         state.presenceRef.off();
     }
 
+    const getStatus=()=>{
+        const ref=state.presenceRef;
+        let usrs=state.users;
+        ref.on('value', (snap)=> {
+            let objIndex = usrs.findIndex((obj => obj.uid === snap.key));
+            usrs[objIndex].status = "online";
+            setstate({...state,users:usrs,userLoading:false});
+        });
+       
+    }
+
     const addListeners=(currentUserId)=>{
         let loadedUsers=[];
         state.userRef.on('child_added',snap=>{
+            // snap.forEach(item => {
+            //      items.push(item) 
+            //     });
             if(currentUserId!==snap.key){
                 let user=snap.val();
                 // console.log(user);
@@ -48,13 +62,13 @@ const DirectMessagePanel = (props) => {
                     userLoading:false
                 });  
             }
-            
         });
+        
 
         state.connectedRef.on('value',snap=>{
             if(snap.val()===true){
-                const ref=state.presenceRef.child(currentUserId);
-                ref.set(true);
+                const ref=state.presenceRef.child(state.user.uid);
+                ref.set(true); 
                 ref.onDisconnect().remove(err=>{
                     if(err!==null){
                         console.error(err);
@@ -62,19 +76,21 @@ const DirectMessagePanel = (props) => {
                 })
             }
         });
-
+    
         state.presenceRef.on('child_added',snap=>{
-            if(currentUserId!==snap.key){
+            if(state.user.uid!==snap.key){
                 addStatusToUser(snap.key);
             }
         })
-
+    
         state.presenceRef.on('child_removed',snap=>{
-            if(currentUserId!==snap.key){
+            if(state.user.uid!==snap.key){
                 addStatusToUser(snap.key,false);
             }
         })
     }
+
+    
 
     const addStatusToUser=(userId,connected=true)=>{
         const updatedUser=state.users.reduce((acc,user)=>{
