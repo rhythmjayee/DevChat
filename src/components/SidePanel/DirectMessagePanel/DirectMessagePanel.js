@@ -37,11 +37,11 @@ const DirectMessagePanel = (props) => {
         state.userRef.on('child_added',snap=>{
             if(currentUserId!==snap.key){
                 let user=snap.val();
-                console.log(user);
+                // console.log(user);
                 user['uid']=snap.key;
                 user['status']='offline';
                 loadedUsers.push(user);
-                console.log(loadedUsers);
+                // console.log(loadedUsers);
                 setstate({
                     ...state,
                     users:loadedUsers,
