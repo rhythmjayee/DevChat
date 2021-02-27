@@ -9,12 +9,18 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
      const [state, setstate] = useState({
         // activeChannel:'',
          channels:[],
-         channelName:'',
-         channelDetails:'',
+        //  channelName:'',
+        //  channelDetails:'',
          modal:false,
          channelRef:firebase.database().ref('channels'),
         //  firstLoad:true,
      });
+
+    //  const [notificationState, setNotificationState] = useState({
+    //      channel:null,
+    //      messageRef:firebase.database().ref('messages'),
+    //      notifications:[]
+    //  });
 
        
         useEffect(() => {
@@ -41,9 +47,44 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
                 loadedChannels.push(snap.val());
                 // console.log(snap.val());
                 setstate({...state,channels:loadedChannels});
+                // addNotificationListners(snap.key);
             });
         }
+//-------------------------------------------------------------------
+        const addNotificationListners=(channelId)=>{
+            notificationState.messageRef.child(channelId).on('child_added',snap=>{
+                // console.log(notificationState.channel);
+                // if(notificationState.channel){
+                    console.log(snap.val());
+                    handleNotifications(channelId,notificationState.notifications,snap);
+                // }
+            })
+        }
 
+        const handleNotifications=(channelId,notifications,snap)=>{
+            let lastTotal=0;
+            let index=notifications.findIndex(notification=> notification.id===channelId);    
+            if(index !==-1){
+                if(channelId !== notificationState.channel.id){
+                    lastTotal=notifications[index].total;
+
+                    if(snap.numChildren()-lastTotal>0){
+                        notifications[index].count=snap.numChildren()-lastTotal;
+                    }
+                }
+                notifications[index].lastKnownTotal=snap.numChildren();
+            }else{
+                notifications.push({
+                   id:channelId,
+                   total:snap.numChildren(),
+                   lastKnownTotal: snap.numChildren(),
+                   count:0
+                })
+            }
+            setNotificationState({...notificationState,notifications:notifications});
+
+        }
+//------------------------------------------------------------------------------------------
         const removeListeners=()=>{
             state.channelRef.off();
         }
@@ -80,6 +121,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
             if(state.channels.length>0){
                 // setActiveChannel(state.channels[0]);
                 // props.setChannel(state.channels[0]);
+                // setstate({...state,channel:state.channels[0]});
                 changeChannel(state.channels[0]);
                
             }
@@ -90,6 +132,8 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
          const changeChannel=(channel)=>{
             props.setChannel(channel);
             props.setPrivateChannel(false);
+            // console.log(channel);
+            setNotificationState({...notificationState,channel:channel});
             // setActiveChannel(channel);
          }  
          
@@ -120,7 +164,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         return(
             channels.length>0 && channels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} active={ch.id===props.currentChannel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
+                    <MenuItem key={ch.id} active={ch.id===notificationState.channel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
                         # {ch.name} 
                         {/* {console.log(ch.id,props.currentChannel.id)} */}
                     </MenuItem>
