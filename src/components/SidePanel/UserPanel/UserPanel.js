@@ -28,8 +28,8 @@ const UserPanel=(props)=> {
 const handleSignOut= async ()=>{
     try{
         props.clearChannel();
-        const res=await firebase.auth().signOut();
-        console.log('signOut!!');
+        await firebase.auth().signOut();
+        console.log(res,'signOut!!');
     }
     catch(err){
         console.error(err.message);

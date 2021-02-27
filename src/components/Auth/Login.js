@@ -11,7 +11,7 @@ const Login=()=>{
         errorsState:[],
         loading:false,
     });
-    const {username,email,password,passwordConfirmation,errorsState,loading,success}=state;
+    const {email,password,errorsState,loading,success}=state;
 
     
     const isFormValid=()=>{
@@ -22,20 +22,18 @@ const Login=()=>{
     const handleChange=(e)=>{
         setstate({...state,[e.target.name]:e.target.value});
     };
-    const handleSubmit=(e)=>{
-        e.preventDefault();
-        console.log(state.email,state.password);
-        if(isFormValid()){
-            setstate({...state,errorsState:[],loading:true});
-            firebase.auth().signInWithEmailAndPassword(email,password)
-            .then(user=>{
-                console.log(user);
-            })
-            .catch(err=>{
+    const handleSubmit= async (e)=>{
+        try{
+            e.preventDefault();
+            if(isFormValid()){
+                setstate({...state,errorsState:[],loading:true});
+                const res= await firebase.auth().signInWithEmailAndPassword(email,password);
+            }
+        }
+        catch(err){
                 console.error(err.message);
                 setstate({...state,errorsState:[...errorsState,err],loading:false});
-            });
-        }
+            };
     }
 
     const handleInputError=(inputName)=>{
