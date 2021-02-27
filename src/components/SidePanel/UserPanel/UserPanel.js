@@ -2,6 +2,9 @@ import React from 'react'
 
 import {Grid, GridColumn, GridRow, Header, HeaderContent, Icon,Dropdown,Image} from 'semantic-ui-react';
 import firebase from '../../../firebase'
+import {connect} from 'react-redux'
+import {clearChannel} from '../../../actions/index'
+
 
 const UserPanel=(props)=> {
 
@@ -22,14 +25,15 @@ const UserPanel=(props)=> {
         }
 ]
 
-const handleSignOut=()=>{
-    firebase.auth().signOut()
-    .then(res=>{
+const handleSignOut= async ()=>{
+    try{
+        props.clearChannel();
+        const res=await firebase.auth().signOut();
         console.log('signOut!!');
-    })
-    .catch(err=>{
+    }
+    catch(err){
         console.error(err.message);
-    })
+    };
 }
 
 
@@ -59,4 +63,4 @@ const handleSignOut=()=>{
     )
 }
 
-export default UserPanel;
+export default connect(null,{clearChannel})(UserPanel);

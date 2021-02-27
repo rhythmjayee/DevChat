@@ -49,6 +49,7 @@ const channel_reducer=(state = initalChannelState ,action)=>{
                 return{
                     ...state,
                     currentChannel:null,
+                    isPrivateChannel:false
                 }
             
         default:
