@@ -10,7 +10,7 @@ export const setUser= user =>{
     }
 }
 
-export const clearUser= user =>{
+export const clearUser= () =>{
     return{
         type:actionTypes.CLEAR_USER,
     }
@@ -32,5 +32,11 @@ export const setPrivateChannel= isPrivateChannel =>{
         payload:{
             isPrivateChannel
         }
+    }
+}
+
+export const clearChannel= () =>{
+    return{
+        type:actionTypes.CLEAR_CHANNEL,
     }
 }

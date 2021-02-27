@@ -20,6 +20,7 @@ const user_reducer=(state = initialUserState ,action)=>{
             case actionTypes.CLEAR_USER:
             return{
                 ...state,
+                currentUser:null,
                 isLoading:false
             }
         default:
@@ -44,6 +45,11 @@ const channel_reducer=(state = initalChannelState ,action)=>{
                 ...state,
                 isPrivateChannel:action.payload.isPrivateChannel,
             }
+            case actionTypes.CLEAR_CHANNEL:
+                return{
+                    ...state,
+                    currentChannel:null,
+                }
             
         default:
             return state;

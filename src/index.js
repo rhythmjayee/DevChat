@@ -24,7 +24,7 @@ const store=createStore(rootReducer,composeWithDevTools());// making of store an
 const Root=(props)=>{//root component
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged(user=>{ // checking already logged In user
+        firebase.auth().onAuthStateChanged(user=>{ // checking already logged In user from firebase localstorage
             if(user){
                 //triggering actions
                 props.setUser(user);
