@@ -25,12 +25,12 @@ const Register=()=>{
         let error;
         if(isFormEmpty(state)){
             error={message:"Fill all details"};// if erorrs -> setting errors to local state
-            errors=[...errors,error];
+            errors.push(error);
             setstate({...state,errorsState:errors});
             return false;
         }else if(!isPasswordValid(state)){
             error={message:"Password is invalid"};
-            errors=[...errors,error];
+            errors.push(error);
             setstate({...state,errorsState:errors});
             return false;
         }else{
@@ -57,23 +57,16 @@ const Register=()=>{
         setstate(prevState=>({...prevState,[e.target.name]:e.target.value}));
 };
 
-    const handleSubmit=(e)=>{
-        e.preventDefault();
-        // console.log(state.email,state.password);
-        if(isFormValid()){//creating user
-            firebase
-            .auth()
-            .createUserWithEmailAndPassword(email,password)
-            .then(createdUser=>{
-                // console.log(createdUser);
-                createdUser.user.updateProfile({
-                    displayName:username,
-                    photoURL:`http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=robohash&r=x`
-                })//md5-> create hash
-                .then(()=>{
-                    saveUser(createdUser).then(()=>{
-                        console.log("user Saved");
-                        setstate({
+    const handleSubmit= async (e) =>{
+        try{
+            e.preventDefault();
+            if(isFormValid()){//creating user
+                const createdUser= await firebase.auth().createUserWithEmailAndPassword(email,password);
+                await createdUser.user.updateProfile({
+                        displayName:username,
+                        photoURL:`http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=robohash&r=x`
+                    })//md5-> create hash
+                    setstate({
                         username:'',
                         email:'',
                         password:'',
@@ -82,19 +75,17 @@ const Register=()=>{
                         loading:false,
                         success:true
                         });
-                    })
-                }).catch(err=>{
+                await saveUser(createdUser);
+                console.log("user Saved");
+               
+            }
+        }
+        catch(err){
                     console.error(err);
                     setstate({...state,errorsState:[...errorsState,err], loading:false});
-                })
+                }
                 
-            })
-            .catch(err=>{
-                console.error(err);
-                setstate({...state,errorsState:[...errorsState,err], loading:false});
-            })
-        }
-    }
+            }
 
     const saveUser=(createdUser)=>{
         return state.userRef.child(createdUser.user.uid).set({
