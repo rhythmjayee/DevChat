@@ -27,7 +27,7 @@ const Login=()=>{
             e.preventDefault();
             if(isFormValid()){
                 setstate({...state,errorsState:[],loading:true});
-                const res= await firebase.auth().signInWithEmailAndPassword(email,password);
+                await firebase.auth().signInWithEmailAndPassword(email,password);
             }
         }
         catch(err){
@@ -54,13 +54,6 @@ const Login=()=>{
                     <Message error  style={{background:'#ffb2d6'}}>
                         <h3>
                             {displayErrors()}
-                        </h3>
-                    </Message>
-                )}
-                {success && (
-                    <Message success  style={{background:'#89f9ab'}}>
-                        <h3>
-                            Account successfully created
                         </h3>
                     </Message>
                 )}

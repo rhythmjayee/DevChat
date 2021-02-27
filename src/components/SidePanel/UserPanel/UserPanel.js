@@ -29,7 +29,7 @@ const handleSignOut= async ()=>{
     try{
         props.clearChannel();
         await firebase.auth().signOut();
-        console.log(res,'signOut!!');
+        console.log('signOut!!');
     }
     catch(err){
         console.error(err.message);
