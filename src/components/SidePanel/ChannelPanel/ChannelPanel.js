@@ -6,14 +6,22 @@ import {connect} from 'react-redux';
 import {setChannel,setPrivateChannel} from '../../../actions/index'
 
  const ChannelPanel = (props) => {
-     const [state, setstate] = useState({
-        // activeChannel:'',
-         channels:[],
-        //  channelName:'',
-        //  channelDetails:'',
+
+    const [refs, setRefs] = useState({
+        channelRef:firebase.database().ref('channels'),
+    });
+
+    const [modalInputs, setModalInputs] = useState({
+         channelName:'',
+         channelDetails:'',
          modal:false,
          channelRef:firebase.database().ref('channels'),
-        //  firstLoad:true,
+     });
+
+     const [state, setstate] = useState({
+        activeChannel:null,
+         channels:[],
+         firstLoad:true,
      });
 
     //  const [notificationState, setNotificationState] = useState({
@@ -24,32 +32,92 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
 
        
         useEffect(() => {
-                addListener();
+            firstLoadChannels();
                 return () => {
                    removeListeners();
                   }
         }, []);
         
-        useEffect(() => {
-            setFirstChannel();
-        }, [state.channels]); 
+        // useEffect(() => {
+        //     setFirstChannel();
+        // }, [state.channels]); 
 
         // useEffect(() => {
         //     setActiveChannel(state.channels[0]);
         // }, [state.activeChannel]);
 
-        const {channels,modal}=state;
+        const {channels}=state;
 
-        const addListener=()=>{
+        const firstLoadChannels= async ()=>{
             let loadedChannels=[];
-            //listen channel ref
-             state.channelRef.on('child_added',snap=>{ 
-                loadedChannels.push(snap.val());
-                // console.log(snap.val());
-                setstate({...state,channels:loadedChannels});
-                // addNotificationListners(snap.key);
-            });
+              const res=await refs.channelRef.once('value');
+              const channelsOp=Object.values(res.val());
+            //   console.log(channelsOp);
+              loadedChannels=[...channelsOp];
+            setstate({...state,channels:loadedChannels});
+            // console.log(state.channels[0]);
+            setFirstChannel();
         }
+
+        const addListener= async ()=>{
+           
+                // addNotificationListners(snap.key);
+           
+        }
+        const removeListeners=()=>{
+            refs.channelRef.off();
+        }
+
+        const addChannel= async ()=>{
+            const {channelName,channelDetails}=modalInputs;
+            const {channelRef}=refs;
+            const {uid,displayName,photoURL}=props.currentUser;
+            const key=channelRef.push().key;
+            const newChannel={
+                id:key,
+                name:channelName,
+                details:channelDetails,
+                createdBy:{
+                    id:uid,
+                    name:displayName,
+                    avatar:photoURL
+                }
+            }
+            try{
+                await channelRef.child(key).update(newChannel)
+                setModalInputs({...modalInputs,channelName:'',channelDetails:'',modal:!modalInputs.modal})  ;
+            }
+            catch(err){
+                console.error(err.message);
+            };
+    
+         }
+
+        const setFirstChannel=()=>{
+            if(state.channels.length>0){
+                // setActiveChannel(state.channels[0]);
+                // props.setChannel(state.channels[0]);
+                // setstate({...state,channel:state.channels[0]});
+                changeChannel(state.channels[0]);
+               
+            }
+            // console.log('----')
+            // setstate({...state,firstLoad:false});
+        }
+
+         const changeChannel=(channel)=>{
+            setstate({...state,activeChannel:channel,firstLoad:false});
+            props.setChannel(channel);
+            props.setPrivateChannel(false);
+            // console.log(channel);
+            // setNotificationState({...notificationState,channel:channel});
+            // setActiveChannel(channel);
+         }  
+         
+        //  const setActiveChannel=(channel)=>{
+            // console.log(channel.id);
+        //     setstate(prevState=>({...prevState,activeChannel:channel.id}));
+        //  }
 //-------------------------------------------------------------------
         const addNotificationListners=(channelId)=>{
             notificationState.messageRef.child(channelId).on('child_added',snap=>{
@@ -85,81 +153,26 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
 
         }
 //------------------------------------------------------------------------------------------
-        const removeListeners=()=>{
-            state.channelRef.off();
-        }
-
-        const addChannel=()=>{
-            const {channelRef,channelName,channelDetails}=state;
-            const {uid,displayName,photoURL}=props.currentUser;
-            const key=channelRef.push().key;
-            const newChannel={
-                id:key,
-                name:channelName,
-                details:channelDetails,
-                createdBy:{
-                    id:uid,
-                    name:displayName,
-                    avatar:photoURL
-                }
-            }
-    
-            channelRef.child(key)
-            .update(newChannel)
-            .then(()=>{
-                // addListener();
-                // modalHandler();  
-                setstate({...state,channelName:'',channelDetails:'',modal:!modal})         
-            })
-            .catch(err=>{
-                console.error(err.message);
-            });
-    
-         }
-
-        const setFirstChannel=()=>{
-            if(state.channels.length>0){
-                // setActiveChannel(state.channels[0]);
-                // props.setChannel(state.channels[0]);
-                // setstate({...state,channel:state.channels[0]});
-                changeChannel(state.channels[0]);
-               
-            }
-            // console.log('----')
-            // setstate({...state,firstLoad:false});
-        }
-
-         const changeChannel=(channel)=>{
-            props.setChannel(channel);
-            props.setPrivateChannel(false);
-            // console.log(channel);
-            // setNotificationState({...notificationState,channel:channel});
-            // setActiveChannel(channel);
-         }  
-         
-        //  const setActiveChannel=(channel)=>{
-            // console.log(channel.id);
-        //     setstate(prevState=>({...prevState,activeChannel:channel.id}));
-        //  }
+       
      
-
+// Modal functions
      const handleChange=(e)=>{
-        setstate({...state,[e.target.name]:e.target.value});
+        setModalInputs({...modalInputs,[e.target.name]:e.target.value});
      }
      const modalHandler=()=>{
-        setstate({...state,modal:!modal});
+        setModalInputs({...modalInputs,modal:!modalInputs.modal});
      }
      const isFormValid=({channelName,channelDetails})=> channelName && channelDetails;
 
     
      const handleSubmit=(e)=>{
         e.preventDefault();
-        if(isFormValid(state)){
-            addChannel(state);
+        if(isFormValid(modalInputs)){
+            addChannel();
         }
      }
 
-    
+    //display channels
      const displayChannels=(channels)=>{
         return(
             channels.length>0 && channels.map((ch,i)=>{
@@ -186,15 +199,15 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
             {props.currentChannel && state.channels.length>0?displayChannels(channels):<Button style={{backgroundColor:'#515050'}} className={'loading'}></Button>}
         </MenuMenu>
         {/* Add channel modal */}
-        <Modal basic open={modal} onClose={modalHandler}>
+        <Modal basic open={modalInputs.modal} onClose={modalHandler}>
             <ModalHeader>Add a Channel</ModalHeader>
             <ModalContent>
                 <Form onSubmit={handleSubmit}>
                     <FormField>
-                        <Input fluid label='Name of channel' name='channelName' value={state.channelName} onChange={handleChange} />
+                        <Input fluid label='Name of channel' name='channelName' value={modalInputs.channelName} onChange={handleChange} />
                     </FormField>
                     <FormField>
-                        <Input fluid label='About the channel' name='channelDetails'value={state.channelDetails} onChange={handleChange} />
+                        <Input fluid label='About the channel' name='channelDetails' value={modalInputs.channelDetails} onChange={handleChange} />
                     </FormField>
                 </Form>
             </ModalContent>
