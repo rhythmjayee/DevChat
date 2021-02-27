@@ -133,7 +133,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
             props.setChannel(channel);
             props.setPrivateChannel(false);
             // console.log(channel);
-            setNotificationState({...notificationState,channel:channel});
+            // setNotificationState({...notificationState,channel:channel});
             // setActiveChannel(channel);
          }  
          
@@ -164,7 +164,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         return(
             channels.length>0 && channels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} active={ch.id===notificationState.channel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
+                    <MenuItem key={ch.id} active={ch.id===props.currentChannel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
                         # {ch.name} 
                         {/* {console.log(ch.id,props.currentChannel.id)} */}
                     </MenuItem>
