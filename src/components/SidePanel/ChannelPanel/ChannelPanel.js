@@ -22,6 +22,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
          channels:[],
          firstLoad:true,
      });
+     const [activeCh, setactiveCh] = useState(null);
 
     //  const [notificationState, setNotificationState] = useState({
     //      channel:null,
@@ -52,11 +53,31 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
               const res=await refs.channelRef.once('value');
               const channelsOp=Object.values(res.val());
               loadedChannels=[...channelsOp];
-             setstate({...state,channels:loadedChannels,activeChannel:channelsOp[0],firstLoad:false});
-             changeChannel(channelsOp[0]);
+              setstate({...state,channels:channelsOp,activeChannel:channelsOp[0],firstLoad:false});
+              changeChannel(channelsOp[0]);
 
             // setFirstChannel();
         }
+        const changeChannel=(channel)=>{
+            setactiveCh(channel);
+            props.setChannel(channel);
+            props.setPrivateChannel(false);
+            // setNotificationState({...notificationState,channel:channel});
+         }
+
+
+         //display channels
+     const displayChannels=()=>{
+        return(
+            !firstLoad && activeCh && channels.map((ch,i)=>{
+                return(
+                    <MenuItem key={ch.id} active={ch.id===activeCh.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
+                        # {ch.name} 
+                    </MenuItem>
+                )
+            })
+        )
+     }
 
         const addListener= async ()=>{
            
@@ -92,11 +113,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
     
          }
 
-         const changeChannel=(channel)=>{
-            props.setChannel(channel);
-            props.setPrivateChannel(false);
-            // setNotificationState({...notificationState,channel:channel});
-         }  
+          
          
 //-------------------------------------------------------------------
         const addNotificationListners=(channelId)=>{
@@ -152,18 +169,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         }
      }
 
-    //display channels
-     const displayChannels=()=>{
-        return(
-            !firstLoad && channels.map((ch,i)=>{
-                return(
-                    <MenuItem key={ch.id} active={ch.id===activeChannel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
-                        # {ch.name} 
-                    </MenuItem>
-                )
-            })
-        )
-     }
+    
 
     return (
         <>
@@ -203,9 +209,5 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         </>
     )
 }
-const mapsStateFromProps= state =>{
-    return{
-        currentChannel:state.channel.currentChannel
-    }
-}
-export default connect(mapsStateFromProps,{setChannel,setPrivateChannel})(ChannelPanel);
+
+export default connect(null,{setChannel,setPrivateChannel})(ChannelPanel);
