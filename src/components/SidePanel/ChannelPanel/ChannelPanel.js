@@ -51,10 +51,12 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         const firstLoadChannels= async ()=>{
             let loadedChannels=[];
               const res=await refs.channelRef.once('value');
+            //   console.log(res.val());
               const channelsOp=Object.values(res.val());
               loadedChannels=[...channelsOp];
               setstate({...state,channels:channelsOp,activeChannel:channelsOp[0],firstLoad:false});
               changeChannel(channelsOp[0]);
+              addListener(loadedChannels);
 
             // setFirstChannel();
         }
@@ -79,9 +81,16 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         )
      }
 
-        const addListener= async ()=>{
-           
-                // addNotificationListners(snap.key);
+        const addListener= async (loadedChannels)=>{
+            let ch=[...loadedChannels];
+            refs.channelRef.endAt().limitToLast(1).on('child_added', function(snapshot) {
+                if(loadedChannels[loadedChannels.length-1].id !== snapshot.val().id){
+                    let newChannel=snapshot.val();
+                    ch.push(newChannel);
+                    setstate({...state,channels:ch,activeChannel:ch[0],firstLoad:false});
+                }             
+             }); 
+              // addNotificationListners(snap.key);
            
         }
         const removeListeners=()=>{
