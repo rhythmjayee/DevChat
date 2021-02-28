@@ -15,7 +15,6 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
          channelName:'',
          channelDetails:'',
          modal:false,
-         channelRef:firebase.database().ref('channels'),
      });
 
      const [state, setstate] = useState({
@@ -46,17 +45,17 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         //     setActiveChannel(state.channels[0]);
         // }, [state.activeChannel]);
 
-        const {channels}=state;
+        const {channels,firstLoad,activeChannel}=state;
 
         const firstLoadChannels= async ()=>{
             let loadedChannels=[];
               const res=await refs.channelRef.once('value');
               const channelsOp=Object.values(res.val());
-            //   console.log(channelsOp);
               loadedChannels=[...channelsOp];
-            setstate({...state,channels:loadedChannels});
-            // console.log(state.channels[0]);
-            setFirstChannel();
+             setstate({...state,channels:loadedChannels,activeChannel:channelsOp[0],firstLoad:false});
+             changeChannel(channelsOp[0]);
+
+            // setFirstChannel();
         }
 
         const addListener= async ()=>{
@@ -93,31 +92,12 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
     
          }
 
-        const setFirstChannel=()=>{
-            if(state.channels.length>0){
-                // setActiveChannel(state.channels[0]);
-                // props.setChannel(state.channels[0]);
-                // setstate({...state,channel:state.channels[0]});
-                changeChannel(state.channels[0]);
-               
-            }
-            // console.log('----')
-            // setstate({...state,firstLoad:false});
-        }
-
          const changeChannel=(channel)=>{
-            setstate({...state,activeChannel:channel,firstLoad:false});
             props.setChannel(channel);
             props.setPrivateChannel(false);
-            // console.log(channel);
             // setNotificationState({...notificationState,channel:channel});
-            // setActiveChannel(channel);
          }  
          
-        //  const setActiveChannel=(channel)=>{
-            // console.log(channel.id);
-        //     setstate(prevState=>({...prevState,activeChannel:channel.id}));
-        //  }
 //-------------------------------------------------------------------
         const addNotificationListners=(channelId)=>{
             notificationState.messageRef.child(channelId).on('child_added',snap=>{
@@ -173,13 +153,12 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
      }
 
     //display channels
-     const displayChannels=(channels)=>{
+     const displayChannels=()=>{
         return(
-            channels.length>0 && channels.map((ch,i)=>{
+            !firstLoad && channels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} active={ch.id===props.currentChannel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
+                    <MenuItem key={ch.id} active={ch.id===activeChannel.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
                         # {ch.name} 
-                        {/* {console.log(ch.id,props.currentChannel.id)} */}
                     </MenuItem>
                 )
             })
@@ -196,7 +175,8 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
                 {' '}CHANNELS{' '}({channels.length})  <Icon name='add' onClick={modalHandler}/>
             </MenuItem>
             {/* Channels */}
-            {props.currentChannel && state.channels.length>0?displayChannels(channels):<Button style={{backgroundColor:'#515050'}} className={'loading'}></Button>}
+            {firstLoad && <Button style={{backgroundColor:'#515050'}} className={'loading'}></Button>}
+            {!firstLoad && displayChannels()}
         </MenuMenu>
         {/* Add channel modal */}
         <Modal basic open={modalInputs.modal} onClose={modalHandler}>
