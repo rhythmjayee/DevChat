@@ -73,7 +73,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         return(
             !firstLoad && activeCh && channels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} active={ch.id===activeCh.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
+                    <MenuItem key={ch.id} active={ !props.isPrivateChannel && ch.id===activeCh.id} color='pink' onClick={()=>changeChannel(ch)}  name={ch.name} >
                         # {ch.name} 
                     </MenuItem>
                 )
