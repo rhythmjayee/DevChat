@@ -182,7 +182,8 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
             </MenuItem>
             {/* Channels */}
             {firstLoad && <Button style={{backgroundColor:'#515050'}} className={'loading'}></Button>}
-            {!firstLoad && displayChannels()}
+            {!firstLoad && channels.length>0 && displayChannels()}
+            {!firstLoad && channels.length==0 && "No Channels Found!!"}
         </MenuMenu>
         {/* Add channel modal */}
         <Modal basic open={modalInputs.modal} onClose={modalHandler}>
