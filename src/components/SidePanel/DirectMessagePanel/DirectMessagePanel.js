@@ -49,7 +49,10 @@ const DirectMessagePanel = (props) => {
         const statusRes= await state.presenceRef.once('value');
         const userOP=Object.entries(userRes.val());
         const userIds=[];
-        const statusOP=Object.keys(statusRes.val());
+        // console.log(statusRes.val());
+        let statusOP=[];
+        if(statusRes.val())
+         statusOP=Object.keys(statusRes.val());
         userOP.forEach(([key,usr])=>{
             if(currentUserId!==key){
                 userIds.push(key);
