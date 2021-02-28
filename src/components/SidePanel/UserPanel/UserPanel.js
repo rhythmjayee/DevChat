@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useState} from 'react'
 
 import {Grid, GridColumn, GridRow, Header, HeaderContent, Icon,Dropdown,Image} from 'semantic-ui-react';
 import firebase from '../../../firebase'
@@ -8,6 +8,7 @@ import {clearChannel} from '../../../actions/index'
 
 const UserPanel=(props)=> {
 
+    const [presenceRef, setpresenceRef] = useState(firebase.database().ref('presence'));
 
     const dropDownOptions=()=>[
         {  
@@ -28,6 +29,7 @@ const UserPanel=(props)=> {
 const handleSignOut= async ()=>{
     try{
         props.clearChannel();
+        await presenceRef.child(props.currentUser.uid).remove();
         await firebase.auth().signOut();
         console.log('signOut!!');
     }

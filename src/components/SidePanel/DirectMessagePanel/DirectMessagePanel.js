@@ -1,6 +1,6 @@
 import React,{useState,useEffect} from 'react';
 import firebase from '../../../firebase';
-import {Menu,Icon, MenuMenu, MenuItem} from 'semantic-ui-react';
+import {Button,Icon, MenuMenu, MenuItem} from 'semantic-ui-react';
 
 import {connect} from 'react-redux';
 import {setChannel,setPrivateChannel} from '../../../actions/index'
@@ -43,29 +43,52 @@ const DirectMessagePanel = (props) => {
        
     }
 
-    const addListeners=(currentUserId)=>{
+    const addListeners= async (currentUserId)=>{
         let loadedUsers=[];
-        state.userRef.on('child_added',snap=>{
-            // snap.forEach(item => {
-            //      items.push(item) 
-            //     });
-            if(currentUserId!==snap.key){
+        const userRes= await state.userRef.once('value');
+        const statusRes= await state.presenceRef.once('value');
+        const userOP=Object.entries(userRes.val());
+        const userIds=[];
+        const statusOP=Object.keys(statusRes.val());
+        userOP.forEach(([key,usr])=>{
+            if(currentUserId!==key){
+                userIds.push(key);
+                        let user=usr
+                        user['uid']=key;
+                        if(statusOP.indexOf(key)!==-1){
+                            user['status']='online';
+                        }
+                        else
+                        user['status']='offline';
+
+                        loadedUsers.push(user);
+                        setstate({
+                            ...state,
+                            users:loadedUsers,
+                            userLoading:false
+                        });  
+                    }
+        });
+        // console.log(statusOP)
+        // console.log(loadedUsers);
+        let newUsers=[...loadedUsers];
+        state.userRef.endAt().limitToLast(1).on('child_added',snap=>{
+            if(userIds.indexOf(snap.key)===-1){
                 let user=snap.val();
-                // console.log(user);
+                console.log(user);
                 user['uid']=snap.key;
                 user['status']='offline';
-                loadedUsers.push(user);
-                // console.log(loadedUsers);
+                newUsers.push(user);
                 setstate({
                     ...state,
-                    users:loadedUsers,
+                    users:newUsers,
                     userLoading:false
                 });  
             }
         });
         
 
-        state.connectedRef.on('value',snap=>{
+        state.connectedRef.on('value',snap=>{ //adding currentUser to presence db
             if(snap.val()===true){
                 const ref=state.presenceRef.child(state.user.uid);
                 ref.set(true); 
@@ -136,6 +159,7 @@ const DirectMessagePanel = (props) => {
             ({users.length})
         </MenuItem>
            {/* User to Send Direct Messages */}
+           {userLoading && <Button style={{backgroundColor:'#515050'}} className={'loading'}></Button>}
             {state.users.map(user=>{
                 return <MenuItem
                 key={user.uid}
