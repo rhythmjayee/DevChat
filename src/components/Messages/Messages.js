@@ -19,7 +19,7 @@ const Messages = (props) => {
     });
 
     const [userCount, setUserCountstate] = useState({
-        count:''
+        count:'0 Users'
     });
 
     const [seachTerm,setSearchTerm]=useState({
@@ -39,52 +39,46 @@ const Messages = (props) => {
     }, []);
 
 
-    const addListener=(channelId)=>{
-        addMessageListeners(channelId);
+    const addListener= async (channelId)=>{
+        let loadedMessages=[];
+        const ref=getMessagesRef();
+        const res=await ref.child(channelId).once('value');
+         let messagesOp=[];
+         let messagesIds=[];
+         if(res.val()){
+            messagesOp=Object.values(res.val());
+            Object.entries(res.val()).forEach(id=>{
+                messagesIds.push(id[0]);
+            });
+         }
+         setstate({
+            ...state,
+            messages:messagesOp,
+            messagesLoading:false
+        }); 
+        countUniqueUsers(messagesOp); 
+        // console.log(messagesOp);
+        addMessageListeners(channelId,messagesOp,messagesIds);
     }
 
-    const addMessageListeners=(channelId)=>{
-        let loadedMesages=[];
+    const addMessageListeners=(channelId,messagesOp,messagesIds)=>{
+        let loadedMesages=[...messagesOp];
+        // console.log(messagesIds);
         const ref=getMessagesRef();
 
-        ref.child(channelId).on('child_added',snap=>{
-            loadedMesages.push(snap.val());
-            // console.log(loadedMesages);
-            setstate({
-                ...state,
-                messages:loadedMesages,
-                messagesLoading:false
-            });  
-            // displayMessages();
-            countUniqueUsers(loadedMesages);
+        ref.child(channelId).endAt().limitToLast(1).on('child_added', snap=> {
+            if(messagesIds.indexOf(snap.key)===-1){
+                loadedMesages.push(snap.val());
+                setstate({
+                    ...state,
+                    messages:loadedMesages,
+                    messagesLoading:false
+                });  
+                countUniqueUsers(loadedMesages);
+            }
+            
         })
-        // callForMessages(loadedMesages,ref,channelId).then(()=>{
-        //     console.log('------')
-        //         if(state.messages.length===0){
-        //             setstate({...state,messagesLoading:false})
-        //         }
-        //     })
-       
-       
     };
-    // const callForMessages=(loadedMesages,ref,channelId)=>{
-    //     return new Promise(function(resolve) {
-    //         setTimeout(()=>{
-    //             ref.child(channelId).on('child_added',snap=>{
-    //                 loadedMesages.push(snap.val());
-    //                 // console.log(loadedMesages);
-    //                 setstate({
-    //                     ...state,
-    //                     messages:loadedMesages,
-    //                     messagesLoading:false
-    //                 });  
-    //                 // displayMessages();
-    //                 countUniqueUsers(loadedMesages);
-    //             })
-    //             resolve();
-    //             },5000);
-    //     });
-    // }
 
     const getMessagesRef=()=>{
         const {messagesRef,privateMessageRef,privateChannel}=state
@@ -147,9 +141,6 @@ const Messages = (props) => {
     )
     })
 )
-   
-
-   
 
     const displayChannelName=(channel)=>{
         return channel? `${state.privateChannel ? '@ ' :'# '}${channel.name}` :"";
@@ -171,7 +162,7 @@ const Messages = (props) => {
             <Segment >
                 <CommentGroup className='messages'>
                     {/* messages */}
-                    {/* {console.log(messages)} */}
+                    {!state.messagesLoading && state.messages.length===0 && "No Messages!!!  Start Conversation............"}
                         {(state.messagesLoading || seachTerm.searchLoading)?'Loading....':(seachTerm.input?searchMessages:displayMessages) }
                 </CommentGroup>
             </Segment>
