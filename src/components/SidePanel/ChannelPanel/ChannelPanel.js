@@ -9,6 +9,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
 
     const [refs, setRefs] = useState({
         channelRef:firebase.database().ref('channels'),
+        messageRef:firebase.database().ref('messages'),
     });
 
     const [modalInputs, setModalInputs] = useState({
@@ -24,11 +25,10 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
      });
      const [activeCh, setactiveCh] = useState(null);
 
-    //  const [notificationState, setNotificationState] = useState({
-    //      channel:null,
-    //      messageRef:firebase.database().ref('messages'),
-    //      notifications:[]
-    //  });
+     const [notificationState, setNotificationState] = useState({
+         channel:null,
+         notifications:[]
+     });
 
        
         useEffect(() => {
@@ -56,15 +56,31 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
               loadedChannels=[...channelsOp];
               setstate({...state,channels:channelsOp,activeChannel:channelsOp[0],firstLoad:false});
               changeChannel(channelsOp[0]);
-              addListener(loadedChannels);
+              let entries=Object.entries(res.val());
+              addListener(entries);
+            //   addNotificationListners(entries);
 
             // setFirstChannel();
         }
         const changeChannel=(channel)=>{
             setactiveCh(channel);
+            setNotificationState({...notificationState,channel:channel});
+            clearNotification();
             props.setChannel(channel);
             props.setPrivateChannel(false);
-            // setNotificationState({...notificationState,channel:channel});
+           
+         }
+
+         const clearNotification =()=>{
+             console.log(notificationState);
+             let index=notificationState.notifications.findIndex(notification=> notification.id===activeCh.id);
+
+             if(index!==-1){
+                 let updatedNotifications =[...notificationState.notifications];
+                 updatedNotifications[index].total=notificationState.notifications[index].lastKnownTotal;
+                 updatedNotifications[index].count=0;
+                 setNotificationState({...notificationState,notifications:updatedNotifications});
+             }
          }
 
 
@@ -81,18 +97,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
         )
      }
 
-        const addListener= async (loadedChannels)=>{
-            let ch=[...loadedChannels];
-            refs.channelRef.endAt().limitToLast(1).on('child_added', function(snapshot) {
-                if(loadedChannels[loadedChannels.length-1].id !== snapshot.val().id){
-                    let newChannel=snapshot.val();
-                    ch.push(newChannel);
-                    setstate({...state,channels:ch,activeChannel:ch[0],firstLoad:false});
-                }             
-             }); 
-              // addNotificationListners(snap.key);
-           
-        }
+        
         const removeListeners=()=>{
             refs.channelRef.off();
         }
@@ -125,21 +130,12 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
           
          
 //-------------------------------------------------------------------
-        const addNotificationListners=(channelId)=>{
-            notificationState.messageRef.child(channelId).on('child_added',snap=>{
-                // console.log(notificationState.channel);
-                // if(notificationState.channel){
-                    console.log(snap.val());
-                    handleNotifications(channelId,notificationState.notifications,snap);
-                // }
-            })
-        }
 
-        const handleNotifications=(channelId,notifications,snap)=>{
+        const handleNotifications=(channelId,currentChannelId,notifications,snap)=>{
             let lastTotal=0;
             let index=notifications.findIndex(notification=> notification.id===channelId);    
             if(index !==-1){
-                if(channelId !== notificationState.channel.id){
+                if(channelId !== currentChannelId){
                     lastTotal=notifications[index].total;
 
                     if(snap.numChildren()-lastTotal>0){
@@ -157,6 +153,39 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
             }
             setNotificationState({...notificationState,notifications:notifications});
 
+        }
+
+        const addNotificationListners=(channelId)=>{
+            // console.log(loadedChannels)
+            // loadedChannels.forEach((ch)=>{
+                refs.messageRef.child(channelId).on('child_added',snap=>{
+                    console.log(notificationState,activeCh,state);
+                    if(notificationState.channel){
+                        // console.log(Object.values(snap.val()));
+                        handleNotifications(channelId,notificationState.channel,notificationState.notifications,snap);
+                    }
+                })
+        }
+        const addListener= (loadedChannels)=>{
+            let ch=loadedChannels;
+            // console.log(ch);
+            let keys=[];
+            let chanls=[];
+            loadedChannels.forEach((en)=>{
+                keys.push(en[0]);
+                chanls.push(en[1]);
+            });
+              refs.channelRef.on('child_added', function(snapshot) {
+                if(keys.indexOf(snapshot.val().id) ===-1 ){
+                    let newChannel=snapshot.val();
+                    chanls.push(newChannel);
+                    setstate({...state,channels:chanls,activeChannel:chanls[0],firstLoad:false});
+                }    
+               
+                addNotificationListners(snapshot.key);         
+             });
+             
+           
         }
 //------------------------------------------------------------------------------------------
        
