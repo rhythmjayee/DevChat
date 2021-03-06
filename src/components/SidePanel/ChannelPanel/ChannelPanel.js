@@ -72,7 +72,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
          }
 
          const clearNotification =()=>{
-             console.log(notificationState);
+            //  console.log(notificationState);
              let index=notificationState.notifications.findIndex(notification=> notification.id===activeCh.id);
 
              if(index!==-1){
@@ -159,7 +159,7 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
             // console.log(loadedChannels)
             // loadedChannels.forEach((ch)=>{
                 refs.messageRef.child(channelId).on('child_added',snap=>{
-                    console.log(notificationState,activeCh,state);
+                    // console.log(notificationState,activeCh,state);
                     if(notificationState.channel){
                         // console.log(Object.values(snap.val()));
                         handleNotifications(channelId,notificationState.channel,notificationState.notifications,snap);
