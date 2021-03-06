@@ -10,7 +10,7 @@ const SidePanel = ({currentUser,isPrivateChannel}) => {
     return (
         <Menu size='large' inverted fixed='left' vertical style={{background:'#2F2F2F', fontSize:'1.2em'}}>
             <UserPanel currentUser={currentUser}/>
-            <Starred/>
+            <Starred  currentUser={currentUser}/>
             <ChannelPanel currentUser={currentUser}  isPrivateChannel={isPrivateChannel}/>
             <DirectMessagePanel currentUser={currentUser} isPrivateChannel={isPrivateChannel}/>
         </Menu>

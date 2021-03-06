@@ -166,8 +166,8 @@ const Messages = (props) => {
 
     //starring of channels......................
     const handleStar=()=>{
-        setstate(prev=>({ ...prev,isChannelStarred:!prev.isChannelStarred, messagesLoading:false}));
-        starChannel(!state.isChannelStarred);
+        setchannelStarred(!channelStarred);
+        starChannel(!channelStarred);
     }
 
 //     const firstUpdate = useRef(true);
