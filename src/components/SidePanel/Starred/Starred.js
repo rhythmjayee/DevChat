@@ -10,7 +10,7 @@ const Starred = (props) => {
         user:props.currentUser,
         starredChannels:[],
         starredChannelKeys:[],
-        firstLoad:false
+        isLoading:true
     });
     const [refs, setRefs] = useState({
         userRef:firebase.database().ref('users')
@@ -19,16 +19,9 @@ const Starred = (props) => {
 
     useEffect(() => {
         if(state.user)
-        firstRender(state.user.uid);
-       
+        addListner(state.user.uid);       
     }, [])
-
-    useEffect(() => {
-        if(state.user && state.firstLoad)
-        addListner(state.user.uid);
-
-    }, [state.firstLoad]);
-
+//--------------------------------------------
     const firstRender= async (userId)=>{
 
         const res= await refs.userRef.child(userId).child('starred').once('value');
@@ -43,52 +36,33 @@ const Starred = (props) => {
         })
         
         // console.log(channels,channelKeys);
-        setState({...state,starredChannels:channels,starredChannelKeys:channelKeys,firstLoad:true});
+        setState({...state,starredChannels:channels,starredChannelKeys:channelKeys,isLoading:false});
         // addListner(userId)
     }
-
+//--------------------------------------------------
     const addListner =(userId)=>{
-        // let ch=[];
-        // let newChannels=[];    
-        refs.userRef.child(userId).child('starred').endAt().limitToLast(1).on('child_added',snap=>{
-            console.log(state.starredChannels,state.starredChannelKeys); 
-            const starredChannel ={id:snap.key,...snap.val()};
-            if(state.starredChannelKeys.indexOf(starredChannel.id)===-1){
-                setState(
-                    {...state,
-                    starredChannels:[...state.starredChannels,starredChannel],
-                    starredChannelKeys:[...state.starredChannelKeys,snap.key],
-                    firstLoad:true}
-                    );
-                    console.log('added')
-                    // console.log(state.starredChannels,state.starredChannelKeys); 
-                // newChannels.push(starredChannel);
-                // ch.push(snap.key);
-            }
+        let res=[];
+        refs.userRef.child(userId).child('starred').on('value',snap=>{
+            
+            if(snap.val())
+            res=Object.entries(snap.val());
+            // console.log(res,snap.numChildren());
+            let updatedChannels=[];
+            snap.numChildren() && res.forEach(ch=>{
+                // console.log(updatedChannels,ch[0],ch[1]);
+                updatedChannels=[...updatedChannels,{id:ch[0],...ch[1]}];
+            })
            
-        })
-
-        refs.userRef.child(userId).child('starred').on('child_removed',snap=>{
-            console.log(state.starredChannels,state.starredChannelKeys)
-            const channelToRemoved ={id:snap.key,...snap.val()};
-            const filteredChannels=state.starredChannels.filter(channel=>{
-                return channel.id !==channelToRemoved.id
-            })
-            const filteredChannelKeys=state.starredChannelKeys.filter(id=>{
-                console.log(id);
-                return id!==channelToRemoved.id
-            })
-            console.log(filteredChannels,filteredChannelKeys)
-            setState({...state,starredChannels:filteredChannels,starredChannelKeys:filteredChannelKeys,firstLoad:true});
+            setState(prev=>({...prev,starredChannels:updatedChannels,isLoading:false}));
         })
     }
 
-    const displayChannels=(starredChannels)=>{
-        console.log(starredChannels);
+    const displayChannels=()=>{
+        // console.log(state.starredChannels);
         return(
-             state.firstLoad && starredChannels.length>0 && starredChannels.map((ch,i)=>{
+            !state.isLoading && state.starredChannels.length>0 && state.starredChannels.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch.id} active={ ch.id===activeCh.id}  onClick={()=>changeChannel(ch)}  name={ch.name} >
+                    <MenuItem key={ ch.id} active={ ch.id===activeCh.id}  onClick={()=>changeChannel(ch)}  name={ch.name} >
                         # {ch.name} 
                     </MenuItem>
                 )
@@ -102,7 +76,7 @@ const Starred = (props) => {
        
      }
 
-     const {firstLoad,starredChannels} = state;
+     const {isLoading,starredChannels} = state;
     return (
         <MenuMenu style={{marginTop:'1em',paddingBottom:'2em'}}>
         <MenuItem>
@@ -112,7 +86,7 @@ const Starred = (props) => {
             {' '}({starredChannels.length})
         </MenuItem>
         {/* Channels */}
-        {firstLoad && starredChannels.length>0 && displayChannels(starredChannels)}        
+        {!isLoading && starredChannels.length>0 && displayChannels()}        
     </MenuMenu>
     )
 }

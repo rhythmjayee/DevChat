@@ -183,7 +183,7 @@ const Messages = (props) => {
    
 
     const starChannel = async (toggle)=>{
-        console.log('star')
+        // console.log('star')
         try{
             if(toggle){
                 await state.usersRef.child(`${state.user.uid}/starred`)
