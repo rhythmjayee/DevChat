@@ -8,7 +8,7 @@ import Starred from './Starred/Starred';
 
 const SidePanel = ({currentUser,isPrivateChannel}) => {
     return (
-        <Menu size='large' inverted fixed='left' vertical style={{background:'#2F2F2F', fontSize:'1.2em'}}>
+        <Menu size='large' inverted fixed='left' vertical style={{background:'#2F2F2F', fontSize:'1.2em',overflowY:"scroll"}}>
             <UserPanel currentUser={currentUser}/>
             <Starred  currentUser={currentUser}/>
             <ChannelPanel currentUser={currentUser}  isPrivateChannel={isPrivateChannel}/>
