@@ -115,10 +115,12 @@ import {setChannel,setPrivateChannel} from '../../../actions/index'
                     id:uid,
                     name:displayName,
                     avatar:photoURL
-                }
+                },
             }
             try{
-                await channelRef.child(key).update(newChannel)
+                await channelRef.child(key).update(newChannel);
+                await channelRef.child(key).child(`users/${props.currentUser.uid}`)
+                .update({name:props.currentUser.displayName,avatar:props.currentUser.photoURL});
                 setModalInputs({...modalInputs,channelName:'',channelDetails:'',modal:!modalInputs.modal})  ;
             }
             catch(err){

@@ -16,7 +16,10 @@ const MessagesForm = (props) => {
         errors:[],
         loading:false,
         modal:false,
+        channelRef:firebase.database().ref('channels')
     });
+
+    const [channelUsers,setChannelUsers] = useState([]);
 
     const [uploadFileState, uploadSetstate] = useState({
         uploadState:'',
@@ -25,6 +28,20 @@ const MessagesForm = (props) => {
         percentUploaded:0
     });
 
+    useEffect(() => {
+        if(!props.isPrivateChannel && props.currentChannel){
+            ChannelUsers();
+        }
+    }, [props.currentChannel]);
+
+    const ChannelUsers = () =>{
+        const res=Object.entries(props.currentChannel.users);
+        let usr=res.map(ch=>{
+            return ch[0];
+        });
+        setChannelUsers(usr);
+        // console.log(usr);
+    }
     
 
     const toggleModal=()=>{
@@ -54,28 +71,32 @@ const MessagesForm = (props) => {
         return message;
     }
 
-    const sendMessage=()=>{
-        const {getMessagesRef}=props;
-        const {message,loading,channel}=state;
-
-        if(message){
-            setstate({...state,loading:true});
-
-            const ref=getMessagesRef();
-            ref.child(channel.id)
-            .push()
-            .set(createMessage())
-            .then(()=>{
+    const sendMessage=async()=>{
+        try{
+            const {getMessagesRef}=props;
+            const {message,loading,channel}=state;
+    
+            if(message){
+                setstate({...state,loading:true});
+    
+                const ref=getMessagesRef();
+                await ref.child(channel.id).push().set(createMessage());
+                if(!isPrivateChannel && channelUsers.indexOf(state.user.uid)===-1){
+                    await state.channelRef.child(channel.id).child(`users/${props.currentUser.uid}`)
+                .update({name:props.currentUser.displayName,avatar:props.currentUser.photoURL});
+                }
                 setstate({...state,loading:false,message:'',errors:[]});
-            })
-            .catch(err=>{
-                console.error(err);
-                setstate({...state,loading:false, errors:state.errors.concat(err)});
-            })
+                
         }else{
             setstate({...state,errors:state.errors.concat({message:'Add a message'})});
         }
+       
+        
+    }catch(err){
+        console.error(err);
+        setstate({...state,loading:false, errors:state.errors.concat(err)});
     }
+}
     const {uploadTask,uploadState,percentUploaded}=uploadFileState;
 
     const uploadFile=(file,metadata)=>{

@@ -29,7 +29,10 @@ const App=({currentUser,currentChannel,isPrivateChannel})=>{
       </GridColumn>
 
       <GridColumn width={4}>
-        <MetaPanel/>
+        {!isPrivateChannel && <MetaPanel
+          currentChannel={currentChannel}
+        currentUser={currentUser}
+        />}
       </GridColumn>
    </Grid>
   )
