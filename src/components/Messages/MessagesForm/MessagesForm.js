@@ -30,17 +30,14 @@ const MessagesForm = (props) => {
 
     useEffect(() => {
         if(!props.isPrivateChannel && props.currentChannel){
-            ChannelUsers();
+            ChannelUsers(props.currentChannel);
         }
-    }, [props.currentChannel]);
+    }, [props]);
 
-    const ChannelUsers = () =>{
-        const res=Object.entries(props.currentChannel.users);
-        let usr=res.map(ch=>{
-            return ch[0];
-        });
-        setChannelUsers(usr);
-        // console.log(usr);
+    const ChannelUsers = (channel) =>{
+        state.channelRef.child(channel.id).child('users').on('child_added',snap=>{
+            setChannelUsers(prev=>([...prev,snap.key]));
+        })
     }
     
 
@@ -81,7 +78,7 @@ const MessagesForm = (props) => {
     
                 const ref=getMessagesRef();
                 await ref.child(channel.id).push().set(createMessage());
-                if(!isPrivateChannel && channelUsers.indexOf(state.user.uid)===-1){
+                if(!props.isPrivateChannel && channelUsers.indexOf(state.user.uid)===-1){
                     await state.channelRef.child(channel.id).child(`users/${props.currentUser.uid}`)
                 .update({name:props.currentUser.displayName,avatar:props.currentUser.photoURL});
                 }

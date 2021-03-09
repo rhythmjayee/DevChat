@@ -1,31 +1,40 @@
 import React,{useState,useEffect} from 'react';
 import {MenuMenu,MenuItem,Grid,GridRow,Icon,GridColumn,Header,HeaderContent,Image} from 'semantic-ui-react'
-
+import firebase from '../../firebase';
 
 const MetaPanel = (props) => {
     const [state, setstate] = useState({
         currentChannel:null,
-        isLoading:true
+        channelRef:firebase.database().ref('channels')
+    });
+    const [channelUsers,setChannelUsers] =useState({
+        isLoading:true,
+        users:[]
     });
 
     useEffect(() => {
         if(props.currentChannel)
-        render();
+        render(props.currentChannel);
     }, [props]);
 
-    const render =() =>{
-        setstate(prev=>({...prev,currentChannel:props.currentChannel,isLoading:false}));
+    const render =(channel) =>{
+        setstate(prev=>({...prev,currentChannel:channel,isLoading:false}));
+        state.channelRef.child(channel.id).child('users').on('child_added',snap=>{
+            let user={id:snap.key,...snap.val()};
+            // console.log(user);
+            setChannelUsers(prev=>({...prev,users:[...prev.users,user],isLoading:false}));
+        })
     }
 
     const displayChannels=()=>{
-        let res=Object.entries(state.currentChannel.users);
-        console.log(res)
+        // let res=Object.entries(state.currentChannel.users);
+        // console.log(res)
         return(
-            !state.isLoading && res.map((ch,i)=>{
+            !channelUsers.isLoading && channelUsers.users.map((ch,i)=>{
                 return(
-                    <MenuItem key={ch[0]} color='pink'  name={ch[0]} >
+                    <MenuItem key={ch.id} color='pink'  name={ch.id} >
                     <span  style={{color:'#E61A8D' }}>
-                    <Image src={ch[1].avatar} avatar style={{margin:'.5rem',color:'pink' }} />  # {ch[1].name} 
+                    <Image src={ch.avatar} avatar style={{margin:'.5rem',color:'pink' }} />  # {ch.name} 
                     </span>
                     </MenuItem>
                 )
@@ -44,8 +53,8 @@ const MetaPanel = (props) => {
                     </HeaderContent>
                 </Header>
             </GridRow>
-            {!state.isLoading && props.currentChannel && <Header style={{padding:'0.25rem',color:'white',}} as='h4' inverted> 
-            <span style={{color:'white', backgroundColor:'#6956C9',padding:'15px'}}><Icon color='white' name='male'/>
+            {!channelUsers.isLoading && props.currentChannel && <Header style={{padding:'0.25rem',color:'white',}} as='h4' inverted> 
+            <span style={{color:'white', backgroundColor:'#6956C9',padding:'15px'}}><Icon name='male'/>
             <Image src={props.currentChannel.createdBy.avatar} avatar style={{margin:'.5rem'}}/>{'  '}{props.currentChannel.createdBy.name}{' '}{"( Admin )."}
             </span>
             <HeaderContent style={{marginTop:'20px'}}>
@@ -59,7 +68,7 @@ const MetaPanel = (props) => {
                 </span>
                 {" "} <span style={{color:'white'}}>{"USERS."}</span>
             </MenuItem>
-            {!state.isLoading && displayChannels()}
+            {!channelUsers.isLoading && displayChannels()}
         </MenuMenu>
         </GridColumn>
        </Grid>
