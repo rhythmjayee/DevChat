@@ -61,7 +61,7 @@ const MetaPanel = (props) => {
              <span >Channel Description: {props.currentChannel.details}</span>
              </HeaderContent> 
             </Header>}
-            <MenuMenu style={{marginTop:'1em',paddingBottom:'2em'}}>
+            <MenuMenu style={{marginTop:'1em',paddingBottom:'2em',overflowY:"scroll"}}>
             <MenuItem>
                 <span style={{color:'#6956C9'}}>
                     <Icon name='users' />
