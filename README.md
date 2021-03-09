@@ -1,0 +1,2 @@
+# DevChat
+Slack based chatApp
